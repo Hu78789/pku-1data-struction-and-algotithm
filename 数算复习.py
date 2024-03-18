@@ -1,4 +1,3 @@
-#中缀转后缀
 def infixToPostfix(infixexpr):
     prec = {}
     prec['*'] = 3
@@ -20,11 +19,12 @@ def infixToPostfix(infixexpr):
                 postfixList.append(top)
                 top = stack.pop()
         else:
-            while (not stack) and \
-                    (prec[stack[-1]]) >= prec[token]:
-                postfixList.append(stack.pop())
+            if stack:
+                while (not stack) and \
+                        (prec[stack[-1]] >= prec[token]):
+                    postfixList.append(stack.pop())
             stack.append(token)
-    while not stack:
+    while stack:
         postfixList.append(stack.pop())
     return " ".join(postfixList)
 post = '2 3 +'
@@ -41,3 +41,4 @@ def postfixEval(postfixExpr):
             stack.append(result)
     return stack.pop()
 print(postfixEval(post))
+print(infixToPostfix('2 + 3 + 7'))
