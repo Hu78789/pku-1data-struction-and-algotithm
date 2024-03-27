@@ -62,6 +62,50 @@ class AVL:
         z.height = 1 + max(self._get_height(z.left), self._get_height(z.right))
         y.height = 1 + max(self._get_height(y.left), self._get_height(y.right))
         return y
+        def _delete(self,value,node):
+        if not node:
+            return node
+        if value < node.value:
+            node.left = self._delete(value,node.left)
+        elif value > node.value:
+            node.right = self._delete(value,node.right)
+        else:
+            if not node.left:
+                temp = node.right
+                node = None
+                return temp
+            elif not node.right:
+                temp = node.left
+                node = None
+                return temp
+            temp = self._min_value_node(node.right)
+            node.value = temp.value
+            node.right = self._delete(temp.value,node.right)
+        if not node:
+            return node
+
+        node.height = 1 + max(self._get_height(node.left), self._get_height(node.right))
+        balance = self._get_balance(node)
+        if balance > 1:
+            if self._get_balance(node.left) >= 0:
+                return self._rotate_right(node)
+            else:
+                node.left = self._rotate_left(node.left)
+                return self._rotate_right(node)
+
+        if balance < -1:
+            if self._get_balance(node.right) <= 0:
+                return self._rotate_left(node)
+            else:
+                node.right = self._rotate_right(node.right)
+                return self._rotate_left(node)
+
+        return node
+    def _min_value_node(self,node):
+        current = node
+        while current.left:
+            current = current.left
+        return current    
     def preorder(self):
         return self._preorder(self.root)
     def _preorder(self,node):
