@@ -72,7 +72,7 @@ def build_graph(filename):
         for word1 in similar_words:
             for word2 in similar_words - {word1}:
                 the_graph.add_edge(word1,word2,1)
-                the_graph.add_edge(word2,word1,1)
+                #the_graph.add_edge(word2,word1,1)
     return the_graph
 
 graph1 = build_graph('')
