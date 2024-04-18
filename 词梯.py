@@ -1,109 +1,109 @@
-from collections import deque
 import sys
+from collections import deque
 class Vertex:
-    def __init__(self,id):
-        self.key = id
-        self.connectedTo = {}
-        self.colors = 'white'
-        self.distance = sys.maxsize
+    def __init__(self,key):
+        self.connectedTo={}
+        self.key = key
         self.previous = None
-        self.disc = 0
-        self.fin = 0
-    def add_neighbor(self,nbr,weight):
+        self.distance = sys.maxsize
+        self.color = 'white'
+    def add_neighbor(self,nbr,weight = 1):
+        #nbr应为顶点
         self.connectedTo[nbr] = weight
-    def get_neighbor(self,nbr,weight=0):
-        return self.connectedTo.keys()
-    # def __lt__(self,o):
-    #     return self.id < o.id
+    def get_neighbors(self):
+        return list(self.connectedTo.keys())
 
-    # def setDiscovery(self, dtime):
-    #     self.disc = dtime
-    #
-    # def setFinish(self, ftime):
-    #     self.fin = ftime
-    #
-    # def getFinish(self):
-    #     return self.fin
-    #
-    # def getDiscovery(self):
-    #     return self.disc
 class Graph:
-    def __init__(self):
+    def __init__(self,id = None):
+        self.id = id
         self.vertices = {}
         self.num_vertices = 0
     def add_vertex(self,key):
-        self.num_vertices+=1
-        new_vertex = Vertex(key)
-        self.vertices[key] = new_vertex
-        return new_vertex
-    def get_vertex(self,n):
-        if n in self.vertices:
-            return self.vertices[n]
-        else:
-            return None
-    def __len__(self):
-        return self.num_vertices
+        self.num_vertices += 1
+        new = Vertex(key)
+        self.vertices[key] = new
+        return new
     def __contains__(self, item):
         return item in self.vertices
-    def add_edge(self,f,t,cost):
-        # 单向加边
-        if f not in self.vertices:
-            nv = self.add_vertex(f)
-        if t not in self.vertices:
-            nv = self.add_vertex(t)
-        self.vertices[f].add_neighbor(self.vertices[t],cost)
+
+    def __len__(self):
+        return self.num_vertices
+    def get_vertex(self,key):
+        return self.vertices[key] if key in self.vertices else None
+    def add_edge(self,v1,v2,cost=1):
+        #v1->v2
+        if v1 not in self.vertices:
+            self.add_vertex(v1)
+        if v2 not in self.vertices:
+            self.add_vertex(v2)
+        self.vertices[v1].add_neighbor(self.vertices[v2],cost)
 
     def get_vertices(self):
         return list(self.vertices.keys())
+
     def __iter__(self):
         return iter(self.vertices.values())
-
-def build_graph(filename):
+def build_word_graph(words):
     buckets = {}
-    the_graph = Graph()
-    with open(filename,'r',encoding='utf-8') as file_in:
-        all_words = file_in.readlines()
-    for line in all_words:
-        word = line.strip()
+    graph = Graph()
+    for word in words:
         for i,_ in enumerate(word):
-            bucket = f"{word[:i]}_{word[i+1:]}"
+            bucket = f'{word[:i]}_{word[i+1:]}'
             buckets.setdefault(bucket,set()).add(word)
     for similar_words in buckets.values():
         for word1 in similar_words:
-            for word2 in similar_words - {word1}:
-                the_graph.add_edge(word1,word2,1)
-                #the_graph.add_edge(word2,word1,1)
-    return the_graph
-
-graph1 = build_graph('')
-print(len(graph1))
+            for word2 in similar_words-{word1}:
+                graph.add_edge(word1,word2)
+    return graph
 def bfs(start):
     start.distance = 0
     start.previous = None
     vert_queue = deque()
     vert_queue.append(start)
-    while len(vert_queue) > 0:
+    while len(vert_queue):
         current = vert_queue.popleft()
-        for neighbor in current:
+        for neighbor in current.get_neighbors():
+
             if neighbor.color == 'white':
                 neighbor.color = 'gray'
-                neighbor.distance = current.distance+1
+                neighbor.distance = current.distance + 1
                 neighbor.previous = current
-
                 vert_queue.append(neighbor)
-
         current.color = 'black'
-bfs(graph1.get_vertex('FOOL'))
-def traverse(starting_vertex):
+        #print(current)
+def traverse_path(words,start,end):
+    graph = build_word_graph(words)
+
+    bfs(graph.get_vertex(start))
     ans = []
-    current = starting_vertex
+    if end not in graph:
+        return None
+    current = graph.get_vertex(end)
     while (current.previous):
+        #print(current)
         ans.append(current.key)
         current = current.previous
     ans.append(current.key)
-    return ans
-ans = traverse(graph1.get_vertex('SAGE'))
-print(*ans[::-1])
+    if ans[-1] != start:
+        return None
+    else:
+        return ans[::-1]
+
+
+n = int(input())
+words = []
+for _ in range(n):
+    words.append(input().strip())
+
+start,end = input().split()
+
+
+result = traverse_path(words,start,end)
+if result:
+    print(' '.join(result))
+else:
+    print('NO')
+
 
 
 
