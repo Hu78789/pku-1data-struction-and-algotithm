@@ -1,0 +1,85 @@
+中缀转后缀
+python:
+
+ans = [];stk = []
+char_dict = {'+':1,'-':1,'*': 2, '/': 2, '(': 3, ')': 3}
+s = input()
+i = 0
+while i < len(s):
+    #负数CASE,数字CASE：：：初始化数字
+    #1正确录入运算值
+    if ((i<1 or s[i-1] == '(') and s[i] in ['+','-']) or s[i].isdigit():
+        tmp_s = ""
+        #考虑负数,数字case
+        if s[i] != '+':
+            tmp_s += s[i]
+        while i+1 < len(s) and (s[i+1] == '.' or s[i+1].isdigit()):
+            tmp_s += s[i+1]
+            i+=1
+        ans.append(tmp_s)
+    else:
+        if s[i] == '(':
+            stk.append(s[i])
+        elif s[i] == ')':
+            while stk and stk[-1] != '(':
+                ans.append(stk.pop())
+            stk.pop()
+        else:
+            while stk and stk[-1] != '(' and char_dict[stk[-1]] >= char_dict[s[i]]:
+                ans.append(stk.pop())
+            stk.append(s[i])
+    i+=1
+while stk:
+    ans.append(stk.pop())
+print(*ans)
+
+c++:
+#include <bits/stdc++.h>
+using namespace std;
+void to_deal(string str){
+    stack<char> stk;
+    map<char,int> m;
+    string temp;
+    m['+'] = m['-'] = 1; m['*'] = m['/'] = 2; m['('] = m[')'] = 3;
+    int index = 0;
+    bool flag = true;
+    while (index < str.size()){
+         //判断是否是操作数,如上图介绍
+        if(((index<1||str[index-1]=='(')&&(str[index]=='+'||str[index]=='-'))||isdigit(str[index])){
+            temp = "";
+            if(flag) flag = false;
+            else printf(" ");
+            if(str[index] != '+') printf("%c",str[index]);
+            while (str[index+1] == '.'|| isdigit(str[index+1])){
+                printf("%c",str[++index]);}
+            index++;    
+        }else{
+            if(str[index] == '(') stk.push(str[index]);
+            else if(str[index] == ')'){
+                while(!stk.empty()&&stk.top()!='('){
+                    printf(" %c",stk.top());
+                    stk.pop();
+                }
+                stk.pop();
+            }else{
+                while (!stk.empty()&&stk.top()!='('&&(m[stk.top()]>=m[str[index]])){
+                    printf(" %c",stk.top());
+                    stk.pop();
+                }
+                stk.push(str[index]);
+            }
+            index++;
+        }
+    }
+    while(!stk.empty()){
+        printf(" %c",stk.top());
+        stk.pop();
+    }
+}
+
+int main(){
+    string str;
+    cin>>str; 
+    to_deal(str);
+    return 0;
+}
