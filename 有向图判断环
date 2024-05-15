@@ -1,38 +1,26 @@
-def dfs(node, graph, visited):
-    visited[node] = 1
-
+from collections import defaultdict
+def dfs(node,color):
+    color[node] = 1
     for neighbor in graph[node]:
-        if visited[neighbor] == 0:
-            if dfs(neighbor, graph, visited):
-                return True
-        elif visited[neighbor] == 1:
+        if color[neighbor] == 1:
             return True
-
-    visited[node] = 2
+        elif color[neighbor] == 0 and dfs(neighbor,color):
+            return True
+    color[node] = 2
     return False
 
-def has_cycle_in_graph(n, edges):
-    graph = {i: [] for i in range(1, n + 1)}
-    for edge in edges:
-        x, y = edge
+T = int(input())
+for _ in range(T):
+    n,m = map(int,input().split())
+    graph = defaultdict(list)
+    for _ in range(m):
+        x,y = map(int,input().split())
         graph[x].append(y)
-
-    visited = [0] * (n + 1)
-
-    for i in range(1, n + 1):
-        if visited[i] == 0:
-            if dfs(i, graph, visited):
-                return "Yes"
-
-    return "No"
-
-def main():
-    T = int(input())
-    for _ in range(T):
-        n, m = map(int, input().split())
-        edges = [tuple(map(int, input().split())) for _ in range(m)]
-        result = has_cycle_in_graph(n, edges)
-        print(result)
-
-if __name__ == "__main__":
-    main()
+    color=[0]*(n+1)
+    is_cyclic = False
+    for node in range(1,n+1):
+        if color[node] == 0:
+            if dfs(node,color):
+                is_cyclic = True
+                break
+    print("Yes" if is_cyclic else "No")
