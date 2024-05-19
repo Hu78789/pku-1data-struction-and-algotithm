@@ -1,0 +1,21 @@
+class Node:
+    def __init__(self):
+        self.children={}
+class Trie:
+    def __init__(self):
+        self.root = Node()
+    def insert(self,w):
+        cur=self.root
+        for u in w.split('\\'):
+            if u not in cur.children:
+                cur.children[u]=Node()
+            cur = cur.children[u]
+    def dfs(self,a,layer):
+        for c in sorted(a.children):
+            print(' '*layer+c)
+            self.dfs(a.children[c],layer+1)
+s=Trie()
+for _ in range(int(input())):
+    x=input()
+    s.insert(x)
+s.dfs(s.root,0)
