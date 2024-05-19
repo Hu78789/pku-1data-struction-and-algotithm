@@ -1,0 +1,30 @@
+import heapq
+visited = [False]*105
+heap=[]
+ans = []
+v,a = map(int,input().split())
+indegree=[0 for _ in range(v+1)]
+indegree[0] = 9999
+graph = {i:[] for i in range(1,v+1)}
+for i in range(a):
+    u1,u2 = map(int,input().split())
+    graph[u1].append(u2)
+    indegree[u2]+=1
+index=0
+v_list=[i for i in range(1,v+1)]
+for i in range(1,v+1):
+    if indegree[i] == 0:
+        heapq.heappush(heap,i)
+        visited[i] = True
+while index<v:
+    node = heapq.heappop(heap)
+    ans.append(node)
+    for i in graph[node]:
+        indegree[i]-=1
+        if indegree[i] == 0 and not visited[i]:
+            heapq.heappush(heap,i)
+    index+=1
+res=[]
+for k in ans:
+    res.append(f"v{k}")
+print(*res)
