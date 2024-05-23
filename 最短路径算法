@@ -168,6 +168,7 @@ int main(){
   prim();
   return 0;
 }
+#有钱数限制
 import heapq
 class edge:
     def __init__(self,start,end,length,money):
@@ -206,9 +207,56 @@ def dijskra():
 
     print(ans)
 dijskra()
-
-
-
-
-
 #含限制的最短路径算法+减枝
+
+
+
+
+
+
+
+
+
+#可免单的DIJKSTRA
+import heapq
+inf = float('inf')
+n, m, k = map(int, input().split())  # 读取节点数量、边的数量和最大免单次数
+graph = {i: [] for i in range(1, n + 1)}  # 初始化图的邻接表
+vis = [[False] * (k + 1) for _ in range(n + 1)]  # 记录节点是否已经访问
+dist = [[inf] * (k + 1) for _ in range(n + 1)]  # 记录从起点到每个节点的最短距离
+# 读取边的信息并构建图的邻接表
+for _ in range(m):
+    u, v, w = map(int, input().split())
+    graph[u].append((v, w))
+    graph[v].append((u, w))
+
+# Dijkstra算法求解带有免单功能的最短路径
+#只记录最大值
+def dijkstra(r=1):
+    q = []
+    dist[r][0] = 0
+    heapq.heappush(q,(0,r,0))
+    while q:
+        cur_dist,pos,fre = heapq.heappop(q)
+        if vis[pos][fre]:continue
+        vis[pos][fre] = True
+        for v,w in graph[pos]:
+            #不免单，加入
+            if dist[v][fre] > max(cur_dist,w):
+                dist[v][fre] = max(cur_dist,w)
+                heapq.heappush(q,(dist[v][fre],v,fre))
+            #免单，加入
+            if fre < k and dist[v][fre+1] > cur_dist:
+                dist[v][fre+1] = dist[pos][fre]
+                heapq.heappush(q,(dist[v][fre+1],v,fre+1))
+dijkstra(1)
+ans = inf
+for i in range(k+1):
+    ans = min(dist[n][i],ans)
+print(ans if ans != inf else -1)
+
+
+
+
+
+
