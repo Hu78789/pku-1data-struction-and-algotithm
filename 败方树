@@ -1,0 +1,41 @@
+from collections import deque
+class TreeNode:
+    def __init__(self,value,min_win):
+        self.value = value
+        self.min_win = min_win
+        self.left = None
+        self.right = None
+def build_tree(values):
+    queue = deque(TreeNode(value,value) for value in values)
+    while len(queue) > 1:
+        left_node = queue.popleft()
+        right_node = queue.popleft()
+        new_node = TreeNode(max(left_node.min_win,right_node.min_win),min(left_node.min_win,right_node.min_win))
+        new_node.left = left_node
+        new_node.right = right_node
+        queue.append(new_node)
+    root = TreeNode(queue[0].min_win,queue[0].min_win)
+    root.left = queue[0]
+    return root
+def show(n,root):
+    queue = deque([root])
+    result = []
+    while queue:
+        if len(result) == n:
+            print(*result)
+            return
+        cur = queue.popleft()
+        result.append(cur.value)
+        if cur.left:
+            queue.append(cur.left)
+        if cur.right:
+            queue.append(cur.right)
+n,m = map(int,input().split())
+initial_values = list(map(int,input().split()))
+root = build_tree(initial_values)
+show(n,root)
+for _ in range(m):
+    pos,value = map(int,input().split())
+    initial_values[pos] = value
+    root = build_tree(initial_values)
+    show(n,root)
