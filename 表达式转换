@@ -83,3 +83,90 @@ int main(){
     to_deal(str);
     return 0;
 }
+
+
+
+
+#表达树
+import operator as op
+class Node:
+    def __init__(self,x):
+        self.value = x
+        self.left = None
+        self.right = None
+dict_priority={"*":2,"/":2,"+":1,"-":1}
+def infix_trans(infix):
+    postfix = []
+    op_stack = []
+    for char in infix:
+        if char.isalpha():
+            postfix.append(char)
+        else:
+            if char == '(':
+                op_stack.append(char)
+            elif char == ')':
+                while op_stack and op_stack[-1] != '(':
+                    postfix.append(op_stack.pop())
+                op_stack.pop()
+            else:
+                while op_stack and dict_priority[op_stack[-1]]>=dict_priority[char] and char != '(':
+                    postfix.append(op_stack.pop())
+                op_stack.append(char)
+    while op_stack:
+        postfix.append(op_stack.pop())
+    return postfix
+def build_tree(postfix):
+    stack = []
+    for item in postfix:
+        if item in '+-*/':
+            node = Node(item)
+            node.right = stack.pop()
+            node.left = stack.pop()
+        else:
+            node = Node(item)
+        stack.append(node)
+    return stack[0]
+def get_val(expr_tree,var_vals):
+    if expr_tree.value in '+-*/':
+        operator = {'+':op.add,'-':op.sub,'*':op.mul,'/':op.floordiv}
+        return operator[expr_tree.value](get_val(expr_tree.left,var_vals),get_val(expr_tree.right,var_vals))
+    else:
+        return var_vals[expr_tree.value]
+def getDepth(tree_root):
+    left_depth = getDepth(tree_root.left) if tree_root.left else 0
+    right_depth = getDepth(tree_root.right) if tree_root.right else 0
+    return max(left_depth,right_depth) + 1
+def printExpressionTree(tree_root,d):
+    graph = [" "*(2**d-1)+tree_root.value + " "*(2**d-1)]
+    graph.append(" "*(2**d-2)+("/" if tree_root.left else " ")+
+                 " "+("\\"if tree_root.right else " ")+" "*(2**d-2))
+    if d == 0:
+        return tree_root.value
+    d-=1
+    if tree_root.left:
+        left = printExpressionTree(tree_root.left,d)
+    else:
+        left = [" "*(2**(d+1)-1)]*(2*d+1)
+    right = printExpressionTree(tree_root.right,d) if tree_root.right else [
+        " "*(2**(d+1)-1)]*(2*d+1)
+    for i in range(2*d+1):
+        graph.append(left[i] + " " + right[i])
+    return graph
+
+infix = input()
+n = int(input())
+vars_value={}
+for i in range(n):
+    char,num = input().split()
+    vars_value[char] = int(num)
+postfix = infix_trans(infix)
+tree_root = build_tree(postfix)
+print(''.join(str(x) for x in postfix))
+expression_value = get_val(tree_root, vars_value)
+
+
+for line in printExpressionTree(tree_root, getDepth(tree_root)-1):
+    print(line.rstrip())
+
+
+print(expression_value)
