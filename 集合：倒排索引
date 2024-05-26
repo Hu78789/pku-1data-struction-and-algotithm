@@ -1,0 +1,23 @@
+n = int(input())
+lis = []#出现文档集合
+all_document = set()
+for _ in range(n):
+    data = list(map(int,input().split()))
+    doc_set = set(data[1:])
+    lis.append(doc_set)
+    all_document.update(doc_set)
+# Prepare the not-present sets 未出现文档集合
+lis1 = [all_document - doc_set for doc_set in lis]
+m = int(input())
+for _ in range(m):
+    query = list(map(int,input().split()))
+    result_set = None
+    for num,requirement in enumerate(query):
+        if requirement != 0:
+            current_set = lis[num] if requirement==1 else lis1[num]
+            #取交集
+            result_set = current_set if result_set is None else result_set.intersection(current_set)
+    if not result_set:
+        print("NOT FOUND")
+    else:
+        print(' '.join(map(str, sorted(result_set))))
