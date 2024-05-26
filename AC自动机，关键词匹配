@@ -1,0 +1,74 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N = 1e6+5;
+struct node{
+    int son[26];
+    int end;
+    int fail;
+}t[N];//字典树（数组存）
+int cnt;//字典树在数组中的位置
+void Insert(char *s){
+    int now = 0;
+    for (int i=0;s[i];i++){
+        int ch = s[i] - 'a';
+        if(t[now].son[ch]==0)
+            t[now].son[ch] = cnt++;
+        now = t[now].son[ch];    
+    }
+    t[now].end++;//?
+}
+//bfs建立指针
+void getFail(){
+    queue<int>q;
+    for(int i=0;i<26;i++){
+        if(t[0].son[i]) q.push(t[0].son[i]);
+    }
+    //fail-->同义词
+    while (!q.empty()){
+        int now = q.front();
+        q.pop();
+        for(int i=0;i<26;i++){
+            if (t[now].son[i]){
+                t[t[now].son[i]].fail = t[t[now].fail].son[i];
+                q.push(t[now].son[i]);
+               }
+            else
+                t[now].son[i] = t[t[now].fail].son[i];//虚拟节点   
+        }
+    }
+}
+int query(char *s){
+    int ans = 0;
+    int now = 0;
+    for(int i=0;s[i];i++){
+        int ch = s[i]-'a';
+        now = t[now].son[ch];
+        int tmp = now;
+        while (tmp&&t[tmp].end!=-1){
+            ans+=t[tmp].end;
+            t[tmp].end = -1;
+            tmp = t[tmp].fail;
+            //cout<<"tmp="<<tmp<<" "<<t[tmp].son;
+    }
+    }
+    return ans;
+}
+char str[N];
+int main(){
+    int k; scanf("%d",&k);
+    while (k--){
+        memset(t,0,sizeof(t));
+        cnt = 1;
+        int n; scanf("%d",&n);
+        while (n--){
+            scanf("%s",str);
+            Insert(str);
+            }
+        getFail();
+        scanf("%s",str);
+        printf("%d\n",query(str));    
+    }
+    return 0;
+
+}
