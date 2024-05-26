@@ -35,6 +35,47 @@ def main():
     for _ in range(m):
         u,v,c = map(int,input().split())
         edges.append((u-1,v-1,c))
+
+
+
+#prim
+import heapq
+class edge:
+    def __init__(self,ed,w):
+        self.ed = ed
+        self.w = w
+
+n,m = map(int,input().split())
+graph = {i:[] for i in range(1,n+1)}
+for i in range(m):
+    st,ed,w = map(int,input().split())
+    graph[st].append(edge(ed,w))
+    graph[ed].append(edge(st,w))
+def prim(graph,n):
+    cur_max = -1
+    ans = -1
+
+    heap = [(0,1)]
+
+    visited = [False]*(n+1)
+    #visited[1] = True
+    while heap:
+        w,node = heapq.heappop(heap)
+        cur_max = max(cur_max, w)
+        #可能后来bfs同层访问过
+        if visited[node]:
+            continue
+        visited[node] = True
+        ans += 1
+        if ans == n-1:
+            return ans, cur_max
+        for u in graph[node]:
+            if not visited[u.ed]:
+                heapq.heappush(heap,(u.w,u.ed))
+
+result = prim(graph,n)
+print(*result)
+
     mst,max_edge = kruskal(n,edges)
     print(f"{mst} {max_edge}")
 if __name__ == "__main__":
