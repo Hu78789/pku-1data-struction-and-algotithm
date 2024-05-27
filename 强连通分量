@@ -1,0 +1,93 @@
+//Kosaraju算法
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 10005;
+vector <int> G[N],rG[N];
+vector <int> S;//DFS顺序
+int vis[N],sccno[N],cnt;
+void dfs1(int u){
+    if(vis[u]) return;
+    vis[u] = 1;
+    for(int i=0;i<G[u].size();i++){
+        dfs1(G[u][i]);
+    }
+    S.push_back(u);
+}
+void dfs2(int u){
+    if(sccno[u]) return;
+    sccno[u] = cnt;
+    for(int i=0;i<rG[u].size();i++) dfs2(rG[u][i]);
+}
+void Kosaraju(int n){
+    cnt = 0;
+    S.clear();
+    memset(sccno,0,sizeof(sccno));
+    memset(vis,0,sizeof(vis));
+    for(int i=1;i<=n;i++) dfs1(i);
+    for(int i=n-1;i>=0;i--)
+        if(!sccno[S[i]]){cnt++;dfs2(S[i]);}
+}
+int main(){
+    int n,m,u,v;
+    while(scanf("%d%d",&n,&m),n!=0||m!=0){
+        for(int i=0;i<n;i++){G[i].clear();rG[i].clear();}
+        for(int i=0;i<m;i++){
+            scanf("%d%d",&u,&v);
+            G[u].push_back(v);
+            rG[v].push_back(u);
+        }
+        Kosaraju(n);
+        printf("%s\n",cnt == 1?"Yes":"No");
+    }
+    return 0;
+}
+#python版
+#迷宫城堡Kosaraju
+def dfs1(graph,node,visited,stack):
+    visited[node] = True
+    for nbr in graph[node]:
+        if not visited[nbr]:
+            dfs1(graph,nbr,visited,stack)
+    stack.append(node)
+def dfs2(graph,node,visited,component):
+    visited[node] = True
+    component.append(node)
+    for nbr in graph[node]:
+        if not visited[nbr]:
+            dfs2(graph,nbr,visited,component)
+def kosaraju(graph,n):
+    stack = []
+    visited = [False]*(n+1)
+    for node in graph.keys():
+        if not visited[node]:
+            dfs1(graph, node, visited, stack)
+    rG = {i:[] for i in range(1,n+1)}
+    for node in range(1,len(graph)+1):
+        for nbr in graph[node]:
+            rG[nbr].append(node)
+    visited = [False]*(n+1)
+    sccs = []
+    while stack:
+        node = stack.pop()
+        if not visited[node]:
+            scc = []
+            dfs2(rG,node,visited,scc)
+            sccs.append(scc)
+    return sccs
+def main(n,m):
+    graph = {i:[] for i in range(1,n+1)}
+    for _ in range(m):
+        a,b = map(int,input().split())
+        graph[a].append(b)
+    sccs = kosaraju(graph,n)
+    if len(sccs) == 1:
+        print("Yes")
+    else:
+        print("No")
+
+while True:
+    n,m = map(int,input().split())
+    if n==0 and m==0:
+        break
+    main(n,m)
+
