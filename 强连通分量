@@ -90,4 +90,110 @@ while True:
     if n==0 and m==0:
         break
     main(n,m)
+#Tarjan算法
+def Tarjan(graph):
+    def dfs(node):
+        nonlocal index,stack,indices,low_link,on_stack,sccs
+        index+=1
+        indices[node] = index
+        low_link[node] = index
+        stack.append(node)
+        on_stack[node] = True
+        for nbr in graph[node]:
+            if indices[nbr] == 0:# Neighbor not visited yet
+                dfs(nbr)
+                low_link[node] = min(low_link[node],low_link[nbr])
+            elif on_stack[nbr]:# Neighbor is in the current SCC
+                low_link[node] = min(low_link[node], indices[nbr])
+        if indices[node] == low_link[node]:
+            scc = []
+            while True:
+                top = stack.pop()
+                on_stack[top] = False
+                scc.append(top)
+                if top == node:
+                    break
+            sccs.append(scc)
 
+    index = 0
+    stack = []
+    indices = [0]*(len(graph)+1)#次序
+    low_link = [0]*(len(graph)+1)
+    on_stack = [False]*(len(graph)+1)
+    sccs = []
+    for node in range(1,len(graph)+1):
+        if indices[node] == 0:
+            dfs(node)
+    return sccs
+def main(n,m):
+    graph = {i:[] for i in range(1,n+1)}
+    for _ in range(m):
+        a,b = map(int,input().split())
+        graph[a].append(b)
+    sccs = Tarjan(graph)
+    if len(sccs) == 1:
+        print("Yes")
+    else:
+        print("No")
+
+while True:
+    n,m = map(int,input().split())
+    if n==0 and m==0:
+        break
+    main(n,m)
+//c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 10005;
+int cnt;
+int low[N],num[N],dfn;
+int sccno[N],stack1[N],top;
+vector <int> G[N];
+void dfs(int u){
+   
+    stack1[top++] = u;
+    low[u] = num[u] = ++dfn;
+    for(int i=0;i<G[u].size();++i){
+        int v = G[u][i];
+        if(!num[v]){
+            dfs(v);
+            low[u] = min(low[u],low[v]);
+        }
+        else if(!sccno[v])
+            low[u] = min(low[u],num[v]);        
+    }
+    if(low[u] == num[u]){
+        cnt++;
+        while (1)
+        {
+            int v = stack1[--top];
+            sccno[v] = cnt;
+            if(u==v) break;
+        }
+        
+    }
+}
+void Tarjan(int n){
+    cnt = top = dfn = 0;
+    memset(sccno,0,sizeof(sccno));
+    memset(num,0,sizeof(num));
+    memset(low,0,sizeof(low));
+    for(int i=1;i<=n;i++){
+        if(!num[i])
+            dfs(i);
+    }
+}
+int main(){
+    int n,m,u,v;
+    while(scanf("%d%d",&n,&m),n!=0||m!=0){
+        for(int i=0;i<=n;i++){G[i].clear();}
+        for(int i=0;i<m;i++){
+            scanf("%d%d",&u,&v);
+            G[u].push_back(v);
+            
+        }
+        Tarjan(n);
+        printf("%s\n",cnt == 1?"Yes":"No");
+    }
+    return 0;
+}
