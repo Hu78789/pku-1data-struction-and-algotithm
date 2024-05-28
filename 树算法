@@ -1,3 +1,194 @@
+05430:表达式·表达式树·表达式求值
+查看提交统计提问
+总时间限制: 1000ms 内存限制: 65535kB
+描述
+众所周知，任何一个表达式，都可以用一棵表达式树来表示。例如，表达式a+b*c，可以表示为如下的表达式树：
+
+   +
+  / \
+a   *
+    / \
+    b c
+
+现在，给你一个中缀表达式，这个中缀表达式用变量来表示（不含数字），请你将这个中缀表达式用表达式二叉树的形式输出出来。
+
+输入
+输入分为三个部分。
+第一部分为一行，即中缀表达式(长度不大于50)。中缀表达式可能含有小写字母代表变量（a-z），也可能含有运算符（+、-、*、/、小括号），不含有数字，也不含有空格。
+第二部分为一个整数n(n < 10)，表示中缀表达式的变量数。
+第三部分有n行，每行格式为C　x，C为变量的字符，x为该变量的值。
+输出
+输出分为三个部分，第一个部分为该表达式的逆波兰式，即该表达式树的后根遍历结果。占一行。
+第二部分为表达式树的显示，如样例输出所示。如果该二叉树是一棵满二叉树，则最底部的叶子结点，分别占据横坐标的第1、3、5、7……个位置（最左边的坐标是1），然后它们的父结点的横坐标，在两个子结点的中间。如果不是满二叉树，则没有结点的地方，用空格填充（但请略去所有的行末空格）。每一行父结点与子结点中隔开一行，用斜杠（/）与反斜杠（\）来表示树的关系。/出现的横坐标位置为父结点的横坐标偏左一格，\出现的横坐标位置为父结点的横坐标偏右一格。也就是说，如果树高为m，则输出就有2m-1行。
+第三部分为一个整数，表示将值代入变量之后，该中缀表达式的值。需要注意的一点是，除法代表整除运算，即舍弃小数点后的部分。同时，测试数据保证不会出现除以0的现象。
+import operator as op
+class Node:
+    def __init__(self,x):
+        self.value = x
+        self.left = None
+        self.right = None
+dict_priority={"*":2,"/":2,"+":1,"-":1,")":0,"(":0}
+def infix_trans(infix):
+    postfix = []
+    op_stack = []
+    for char in infix:
+        if char.isalpha():
+            postfix.append(char)
+        else:
+            if char == '(':
+                op_stack.append(char)
+            elif char == ')':
+                while op_stack and op_stack[-1] != '(':
+                    postfix.append(op_stack.pop())
+                op_stack.pop()
+            else:
+                while op_stack and dict_priority[op_stack[-1]]>=dict_priority[char] and op_stack != '(':
+                    postfix.append(op_stack.pop())
+                op_stack.append(char)
+    while op_stack:
+        postfix.append(op_stack.pop())
+    return postfix
+def build_tree(postfix):
+    stack = []
+    for item in postfix:
+        if item in '+-*/':
+            node = Node(item)
+            node.right = stack.pop()
+            node.left = stack.pop()
+        else:
+            node = Node(item)
+        stack.append(node)
+    return stack[0]
+def get_val(expr_tree,var_vals):
+    if expr_tree.value in '+-*/':
+        operator = {'+':op.add,'-':op.sub,'*':op.mul,'/':op.floordiv}
+        return operator[expr_tree.value](get_val(expr_tree.left,var_vals),get_val(expr_tree.right,var_vals))
+    else:
+        return var_vals[expr_tree.value]
+def getDepth(tree_root):
+    left_depth = getDepth(tree_root.left) if tree_root.left else 0
+    right_depth = getDepth(tree_root.right) if tree_root.right else 0
+    return max(left_depth,right_depth) + 1
+def printExpressionTree(tree_root,d):
+    graph = [" "*(2**d-1)+tree_root.value + " "*(2**d-1)]
+    graph.append(" "*(2**d-2)+("/" if tree_root.left else " ")+
+                 " "+("\\"if tree_root.right else " ")+" "*(2**d-2))
+    if d == 0:
+        return tree_root.value
+    d-=1
+    if tree_root.left:
+        left = printExpressionTree(tree_root.left,d)
+    else:
+        left = [" "*(2**(d+1)-1)]*(2*d+1)
+    right = printExpressionTree(tree_root.right,d) if tree_root.right else [
+        " "*(2**(d+1)-1)]*(2*d+1)
+    for i in range(2*d+1):
+        graph.append(left[i] + " " + right[i])
+    return graph
+
+infix = input().strip()
+n = int(input())
+vars_value={}
+for i in range(n):
+    char,num = input().split()
+    vars_value[char] = int(num)
+postfix = infix_trans(infix)
+tree_root = build_tree(postfix)
+print(''.join(str(x) for x in postfix))
+expression_value = get_val(tree_root, vars_value)
+
+
+for line in printExpressionTree(tree_root, getDepth(tree_root)-1):
+    print(line.rstrip())
+
+
+print(expression_value)
+27638:求二叉树的高度和叶子数目
+查看提交统计提问
+总时间限制: 1000ms 内存限制: 65536kB
+描述
+给定一棵二叉树，求该二叉树的高度和叶子数目二叉树高度定义：从根结点到叶结点依次经过的结点（含根、叶结点）形成树的一条路径，最长路径的结点数减1为树的高度。只有一个结点的二叉树，高度是0。
+
+输入
+第一行是一个整数n，表示二叉树的结点个数。二叉树结点编号从0到n-1，根结点n <= 100 接下来有n行，依次对应二叉树的编号为0,1,2....n-1的节点。 每行有两个整数，分别表示该节点的左儿子和右儿子的编号。如果第一个（第二个）数为-1则表示没有左（右）儿子
+输出
+在一行中输出2个整数，分别表示二叉树的高度和叶子结点个数
+class TreeNode:
+    def __init__(self):
+        self.left = None
+        self.right = None
+n = int(input())
+exist_parents = [False]*n
+forest = [TreeNode() for i in range(n)]
+root_index = 0
+def tree_height(root):
+    if not root:
+        return -1
+    else:
+        return 1 + max(tree_height(root.left),tree_height(root.right))
+for i in range(n):
+    left,right = map(int,input().split())
+    if right != -1:
+        forest[i].right = forest[right]
+        exist_parents[right] = True
+    if left != -1:
+        forest[i].left = forest[left]
+        exist_parents[left] = True
+for i in range(n):
+    if not exist_parents[i]:
+        root_index = i
+        break
+def count_leaves(root):
+    if not root:
+        return 0
+    if root.left is None and root.right is None:
+        return 1
+    else:
+        return count_leaves(root.left) + count_leaves(root.right)
+height = tree_height(forest[root_index])
+leaves = count_leaves(forest[root_index])
+
+print(f'{height} {leaves}')
+#前缀树，26叉树
+class TrieNode:
+    def __init__(self):
+        self.child = {}
+        self.is_end = 0
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+    def insert(self,nums):
+        curNode = self.root
+        for x in nums:
+            if x not in curNode.child:
+                curNode.child[x] = TrieNode()
+            curNode = curNode.child[x]
+        curNode.is_end = 1
+
+    def search(self,num):
+        curnode = self.root
+        for x in num:
+            if x not in curnode.child:
+                return 0
+            curnode = curnode.child[x]
+        return 1
+t = int(input())
+p=[]
+for _ in range(t):
+    n = int(input())
+    nums = []
+    for _ in range(n):
+        nums.append(str(input()))
+    nums.sort(reverse=True)
+    s = 0
+    trie = Trie()
+    for num in nums:
+        s += trie.search(num)
+        trie.insert(num)
+    if s > 0:
+        print('NO')
+    else:
+        print('YES')
 #树序转换  前中-->后
 class TreeNode:
     def __init__(self,value):
