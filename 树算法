@@ -1,0 +1,139 @@
+#磁盘树
+class Node:
+    def __init__(self):
+        self.children={}
+class Trie:
+    def __init__(self):
+        self.root = Node()
+    def insert(self,w):
+        cur=self.root
+        for u in w.split('\\'):
+            if u not in cur.children:
+                cur.children[u]=Node()
+            cur = cur.children[u]
+    def dfs(self,a,layer):
+        for c in sorted(a.children):
+            print(' '*layer+c)
+            self.dfs(a.children[c],layer+1)
+s=Trie()
+for _ in range(int(input())):
+    x=input()
+    s.insert(x)
+s.dfs(s.root,0)
+
+#并查集
+def find(x):#压缩路径
+    if x != s[x]:
+        s[x] = find(s[x])
+    return s[x]
+
+def union(x,y):
+    rootx = find(x);rooty = find(y)
+    if rootx != rooty:
+        s[rooty] = rootx
+    return
+def is_connected(x,y):
+
+    return find(x) == find(y)
+T = int(input())
+for i in range(1,T+1):
+
+    index = i
+    flag = True
+    n,m = map(int,input().split())
+    if n==1:
+        print("Scenario #{}:".format(index))
+        print("No suspicious bugs found!")
+        print()
+        continue
+    s=[i for i in range(2*n+2)]
+    for i in range(m):
+        t1,t2 = map(int,input().split())
+        if not flag:
+            continue
+        if is_connected(t1,t2):
+            flag = False
+
+        union(t1,t2+n)
+        union(t1+n,t2)
+    print("Scenario #{}:".format(index))
+    print("Suspicious bugs found!" if not flag else "No suspicious bugs found!")
+    print()
+
+#败方树
+from collections import deque
+class TreeNode:
+    def __init__(self,value,min_win):
+        self.value = value
+        self.min_win = min_win
+        self.left = None
+        self.right = None
+def build_tree(values):
+    queue = deque(TreeNode(value,value) for value in values)
+    while len(queue) > 1:
+        left_node = queue.popleft()
+        right_node = queue.popleft()
+        new_node = TreeNode(max(left_node.min_win,right_node.min_win),min(left_node.min_win,right_node.min_win))
+        new_node.left = left_node
+        new_node.right = right_node
+        queue.append(new_node)
+    root = TreeNode(queue[0].min_win,queue[0].min_win)
+    root.left = queue[0]
+    return root
+def show(n,root):
+    queue = deque([root])
+    result = []
+    while queue:
+        if len(result) == n:
+            print(*result)
+            return
+        cur = queue.popleft()
+        result.append(cur.value)
+        if cur.left:
+            queue.append(cur.left)
+        if cur.right:
+            queue.append(cur.right)
+n,m = map(int,input().split())
+initial_values = list(map(int,input().split()))
+root = build_tree(initial_values)
+show(n,root)
+for _ in range(m):
+    pos,value = map(int,input().split())
+    initial_values[pos] = value
+    root = build_tree(initial_values)
+    show(n,root)
+
+27947: 动态中位数
+http://cs101.openjudge.cn/practice/27947/
+
+思路： 用堆
+
+代码
+
+# 
+import heapq
+def dynamic_median(nums):
+    min_heap = []#存较大数据
+    max_heap = []#存较小数据
+    median = []
+    for i,num in enumerate(nums):
+        if not max_heap or num <= -max_heap[0]:
+            heapq.heappush(max_heap,-num)
+        else:
+            heapq.heappush(min_heap,num)
+        if len(max_heap)-len(min_heap)>1:
+            heapq.heappush(min_heap,-heapq.heappop(max_heap))
+        elif len(min_heap)>len(max_heap):
+            heapq.heappush(max_heap,-heapq.heappop(min_heap))
+        if i%2 == 0:
+            median.append(-max_heap[0])
+    return median
+
+def main():
+    nums = list(map(int,input().split()))
+    median = dynamic_median(nums)
+    print(len(median))
+    print(*median)
+T = int(input())
+for _ in range(T):
+    main()
