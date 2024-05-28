@@ -1,0 +1,392 @@
+kruskal
+class UnionFind:
+    def __init__(self,n):
+        self.parent = list(range(n))
+        self.rank = [0]*n
+    def find(self,x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+    def union(self,x,y):
+        px,py = self.find(x),self.find(y)
+        if px != py:
+            if self.rank[px] > self.rank[py]:
+                self.parent[py] = px
+            else:
+                self.parent[px] = py
+                if self.rank[px] == self.rank[py]:
+                    self.rank[py] += 1
+def kruskal(n,edges):
+    uf = UnionFind(n)
+    edges.sort(key = lambda x:x[2])
+    mst,max_edge = 0,0
+    for u,v,w in edges:
+        if uf.find(u) != uf.find(v):
+            uf.union(u,v)
+            mst += 1
+            max_edge = max(max_edge,w)
+            if mst == n-1:
+                break
+
+    return mst,max_edge
+def main():
+    n, m = map(int,input().split())
+    edges = []
+    for _ in range(m):
+        u,v,c = map(int,input().split())
+        edges.append((u-1,v-1,c))
+
+
+
+#prim
+import heapq
+class edge:
+    def __init__(self,ed,w):
+        self.ed = ed
+        self.w = w
+
+n,m = map(int,input().split())
+graph = {i:[] for i in range(1,n+1)}
+for i in range(m):
+    st,ed,w = map(int,input().split())
+    graph[st].append(edge(ed,w))
+    graph[ed].append(edge(st,w))
+def prim(graph,n):
+    cur_max = -1
+    ans = -1
+
+    heap = [(0,1)]
+
+    visited = [False]*(n+1)
+    #visited[1] = True
+    while heap:
+        w,node = heapq.heappop(heap)
+        cur_max = max(cur_max, w)
+        #可能后来bfs同层访问过
+        if visited[node]:
+            continue
+        visited[node] = True
+        ans += 1
+        if ans == n-1:
+            return ans, cur_max
+        for u in graph[node]:
+            if not visited[u.ed]:
+                heapq.heappush(heap,(u.w,u.ed))
+
+result = prim(graph,n)
+print(*result)
+
+    mst,max_edge = kruskal(n,edges)
+    print(f"{mst} {max_edge}")
+if __name__ == "__main__":
+    main()
+#有钱数限制
+import heapq
+class edge:
+    def __init__(self,start,end,length,money):
+        self.start = start
+        self.end = end
+        self.money = money
+        self.length = length
+k = int(input())
+n = int(input())
+r = int(input())
+graph = {i:[] for i in range(1,n+1)}
+for i in range(r):
+    s,d,l,t = map(int,input().split())
+    graph[s].append(edge(s,d,l,t))
+def dijskra():
+    visited=[0]*(n+1)
+    ans=-1
+    priorQueue=[]
+    heapq.heappush(priorQueue,(0,0,1))#length,money,pos
+    while priorQueue:
+        length,money,pos = heapq.heappop(priorQueue)
+        visited[pos] = 1
+        if pos == n and money<=k:
+            ans=length
+            break
+        if money > k:
+
+            continue
+        for road in graph[pos]:
+            pos1 = road.end
+            m1 = road.money+money
+            l1 = road.length+length
+            if m1<=k and visited[pos1] != 1:
+                heapq.heappush(priorQueue,(l1,m1,pos1))
+        visited[pos] = 0
+
+    print(ans)
+dijskra()
+#含限制的最短路径算法+减枝
+
+
+
+
+
+
+
+
+
+#可免单的DIJKSTRA
+import heapq
+inf = float('inf')
+n, m, k = map(int, input().split())  # 读取节点数量、边的数量和最大免单次数
+graph = {i: [] for i in range(1, n + 1)}  # 初始化图的邻接表
+vis = [[False] * (k + 1) for _ in range(n + 1)]  # 记录节点是否已经访问
+dist = [[inf] * (k + 1) for _ in range(n + 1)]  # 记录从起点到每个节点的最短距离
+# 读取边的信息并构建图的邻接表
+for _ in range(m):
+    u, v, w = map(int, input().split())
+    graph[u].append((v, w))
+    graph[v].append((u, w))
+
+# Dijkstra算法求解带有免单功能的最短路径
+#只记录最大值
+def dijkstra(r=1):
+    q = []
+    dist[r][0] = 0
+    heapq.heappush(q,(0,r,0))
+    while q:
+        cur_dist,pos,fre = heapq.heappop(q)
+        if vis[pos][fre]:continue
+        vis[pos][fre] = True
+        for v,w in graph[pos]:
+            #不免单，加入
+            if dist[v][fre] > max(cur_dist,w):
+                dist[v][fre] = max(cur_dist,w)
+                heapq.heappush(q,(dist[v][fre],v,fre))
+            #免单，加入
+            if fre < k and dist[v][fre+1] > cur_dist:
+                dist[v][fre+1] = dist[pos][fre]
+                heapq.heappush(q,(dist[v][fre+1],v,fre+1))
+dijkstra(1)
+ans = inf
+for i in range(k+1):
+    ans = min(dist[n][i],ans)
+print(ans if ans != inf else -1)
+#python版
+#迷宫城堡Kosaraju
+def dfs1(graph,node,visited,stack):
+    visited[node] = True
+    for nbr in graph[node]:
+        if not visited[nbr]:
+            dfs1(graph,nbr,visited,stack)
+    stack.append(node)
+def dfs2(graph,node,visited,component):
+    visited[node] = True
+    component.append(node)
+    for nbr in graph[node]:
+        if not visited[nbr]:
+            dfs2(graph,nbr,visited,component)
+def kosaraju(graph,n):
+    stack = []
+    visited = [False]*(n+1)
+    for node in graph.keys():
+        if not visited[node]:
+            dfs1(graph, node, visited, stack)
+    rG = {i:[] for i in range(1,n+1)}
+    for node in range(1,len(graph)+1):
+        for nbr in graph[node]:
+            rG[nbr].append(node)
+    visited = [False]*(n+1)
+    sccs = []
+    while stack:
+        node = stack.pop()
+        if not visited[node]:
+            scc = []
+            dfs2(rG,node,visited,scc)
+            sccs.append(scc)
+    return sccs
+def main(n,m):
+    graph = {i:[] for i in range(1,n+1)}
+    for _ in range(m):
+        a,b = map(int,input().split())
+        graph[a].append(b)
+    sccs = kosaraju(graph,n)
+    if len(sccs) == 1:
+        print("Yes")
+    else:
+        print("No")
+
+while True:
+    n,m = map(int,input().split())
+    if n==0 and m==0:
+        break
+    main(n,m)
+#Tarjan算法
+def Tarjan(graph):
+    def dfs(node):
+        nonlocal index,stack,indices,low_link,on_stack,sccs
+        index+=1
+        indices[node] = index
+        low_link[node] = index
+        stack.append(node)
+        on_stack[node] = True
+        for nbr in graph[node]:
+            if indices[nbr] == 0:# Neighbor not visited yet
+                dfs(nbr)
+                low_link[node] = min(low_link[node],low_link[nbr])
+            elif on_stack[nbr]:# Neighbor is in the current SCC
+                low_link[node] = min(low_link[node], indices[nbr])
+        if indices[node] == low_link[node]:
+            scc = []
+            while True:
+                top = stack.pop()
+                on_stack[top] = False
+                scc.append(top)
+                if top == node:
+                    break
+            sccs.append(scc)
+
+    index = 0
+    stack = []
+    indices = [0]*(len(graph)+1)#次序
+    low_link = [0]*(len(graph)+1)
+    on_stack = [False]*(len(graph)+1)
+    sccs = []
+    for node in range(1,len(graph)+1):
+        if indices[node] == 0:
+            dfs(node)
+    return sccs
+def main(n,m):
+    graph = {i:[] for i in range(1,n+1)}
+    for _ in range(m):
+        a,b = map(int,input().split())
+        graph[a].append(b)
+    sccs = Tarjan(graph)
+    if len(sccs) == 1:
+        print("Yes")
+    else:
+        print("No")
+
+while True:
+    n,m = map(int,input().split())
+    if n==0 and m==0:
+        break
+    main(n,m)
+//Dijskra算法
+#include <iostream>
+using namespace std;
+#include <bits/stdc++.h>
+const long long INF = 0x3f3f3f3f3f3f3f3fLL;
+const int N = 3e5 + 2;
+struct edge{
+  int from,to;
+  long long w;
+  edge(int a,int b,long long c){from = a;to=b;w=c;}
+};
+vector <edge> e[N];//存图e->E
+struct node{
+    int id; long long n_dis;
+    node(int b,long long c){id = b;n_dis=c;}
+    bool operator < (const node &a) const{return n_dis > a.n_dis;}
+};
+int n,m;
+int pre[N];
+//print s-->t path
+void print_path(int s,int t){
+    if(s==t){printf("%d",s);return;}
+    print_path(s,pre[t]);
+    printf("%d",t);
+}
+long long dis[N];
+bool done[N];
+void dijkstra(){
+    int s=1;
+    //初始化
+    for (int i=1;i<=n;i++){
+        dis[i] = INF; done[i] = false;
+    }
+    dis[s] = 0;
+    priority_queue<node>Q;
+    Q.push(node(s,dis[s]));
+    while (!Q.empty()){
+        node u = Q.top();
+        Q.pop();
+        if(done[u.id]) continue;
+        done[u.id] = true;
+        for(int i=0;i<e[u.id].size();i++){
+            edge y = e[u.id][i];
+            if (done[y.to]) continue;
+            if (dis[y.to]>y.w+u.n_dis){
+                dis[y.to] = y.w + u.n_dis;
+                Q.push(node(y.to,dis[y.to]));
+                pre[y.to] = u.id;
+            }
+
+        }
+    }
+
+}
+
+int main()
+{
+  scanf("%d%d",&n,&m);
+  for(int i=1;i<=n;i++) e[i].clear();
+  while(m--){
+    int u,v,w; cin>>u>>v>>w;
+    e[u].push_back(edge(u,v,w));
+    }
+  dijkstra();
+  for(int i=1;i<=n;i++){
+    if(dis[i]>=INF) cout<<"-1 ";
+    else printf("%lld ",dis[i]);
+  }  
+
+  return 0;
+}
+//kruskal算法
+#include <bits/stdc++.h>
+using namespace std;
+int n,m;
+const int N = 5005,M = 2e5+5;
+struct edge{
+    int from;
+    int to;
+    int w;
+    edge(int a,int b,int c){from=a;to=b;w=c;}
+    edge(){}
+}edges[M];
+bool cmp(edge a,edge b){return a.w < b.w;}//从小到大排序
+int s[N];//Disjoint_set
+int find_set(int x){
+  if(x!=s[x]){
+      //t = s[x];
+      s[x] = find_set(s[x]);
+    }
+    return s[x];
+}
+
+void kruskal(){
+    sort(edges+1,edges+m+1,cmp);
+    for (int i=1;i<=n;i++) s[i] = i;
+    int ans=0,cnt=0;
+    for(int i=1;i<=m;i++){
+      if(cnt==n-1) break;
+      int e1 = find_set(edges[i].from);
+      int e2 = find_set(edges[i].to);
+      if (e1==e2) continue;
+      else{
+        ans+=edges[i].w;
+        s[e1] = e2;
+        cnt++;
+        cout<<cnt;
+        cout<<edges[i].from<<edges[i].to;
+        
+      }
+
+    }
+    if (cnt==n-1) cout<<ans;
+    else cout<<"orz";
+}
+int main(){
+    cin>>n>>m;
+    for(int i=1;i<=m;i++) cin>>edges[i].from>>edges[i].to>>edges[i].w;
+    kruskal();
+    return 0;
+}
+
+
+
