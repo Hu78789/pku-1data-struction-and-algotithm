@@ -1,3 +1,46 @@
+#括号嵌套树
+
+class TreeNode:
+    def __init__(self,value):
+        self.value = value
+        self.children = []
+def parse_tree(s):
+    stack = []
+    node = None
+    for char in s:
+        if char.isalpha():
+            node = TreeNode(char)
+            if stack:
+                stack[-1].children.append(node)
+        elif char == '(':
+            if node:
+                stack.append(node)
+        elif char == ')':
+            if stack:
+                node = stack.pop()
+    return node
+def preorder(node):
+    output = [node.value]
+    for c in node.children:
+        output.extend(preorder(c))
+    return ''.join(output)
+def postorder(node):
+    output = []
+    for child in node.children:
+        output.extend(postorder(child))
+    output.append(node.value)
+    return ''.join(output)
+def main():
+    s = input().strip()
+    s = ''.join(s.split())
+    root = parse_tree(s)
+    if root:
+        print(preorder(root))
+        print(postorder(root))
+    else:
+        print("input tree string error!")
+if __name__ == "__main__":
+    main()
 03720:文本二叉树
 查看提交统计提问
 总时间限制: 1000ms 内存限制: 65536kB
