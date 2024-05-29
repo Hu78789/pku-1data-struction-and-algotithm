@@ -1,3 +1,85 @@
+01094：整理一切
+查看提交统计提问
+总时间限制： 1000ms 内存限制： 65536kB
+描述
+不同值的升序排序序列是使用某种形式的小于运算符对元素从小到大进行排序的序列。例如，排序序列 A、B、C、D 意味着 A < B、B < C 和 C < D.在本题中，我们将为您提供一组形式为 A < B 的关系，并要求您确定是否指定了排序顺序。
+
+输入
+输入由多个问题实例组成。每个实例都以包含两个正整数 n 和 m 的行开头，第一个值表示要排序的对象数，其中 2 <= n <= 26。要排序的对象将是大写字母表的前 n 个字符。第二个值 m 表示在本问题实例中将给出的 A < B 形式的关系数。接下来是 m 行，每行包含一个由三个字符组成的此类关系：一个大写字母、字符“<”和第二个大写字母。任何字母都不会超出字母表的前 n 个字母的范围。n = m = 0 的值表示输入结束。
+输出
+对于每个问题实例，输出由一行组成。此行应为以下三行之一：
+
+xxx 关系后确定的排序顺序：yyy...y.
+无法确定排序顺序。
+在 xxx 关系后发现不一致。
+
+其中 xxx 是确定排序序列或发现不一致时处理的关系数，以先到者为准，yyy...y 是排序的升序序列。
+样例输入
+4 6
+A<B
+A<C
+B<C
+C<D
+B<D
+A<B
+3 2
+A<B
+B<A
+26 1
+A<Z
+0 0
+样例输出
+Sorted sequence determined after 4 relations: ABCD.
+Inconsistency found after 2 relations.
+Sorted sequence cannot be determined.
+def topo_sort(v):
+    global vis,pos,T,topo
+    if vis[v] == -1:
+        return -1
+    if pos[v] != -1:
+        return pos[v]
+    vis[v] = -1
+    p = n
+    for i in range(len(T[v])):
+        p = min(p,topo_sort(T[v][i]))
+        if p == -1:
+            return -1
+    topo[p-1] = v
+    pos[v],vis[v] = p-1,0
+    return p-1
+
+
+while True:
+    n,m = map(int,input().split())
+    if n == m == 0:
+        break
+    T = [[] for _ in range(n)]
+    E = []
+    for _ in range(m):
+        s = input()
+        E.append([ord(s[0])-ord('A'),ord(s[2])-ord('A')])
+    topo = [0 for _ in range(n)]
+    for i in range(m):
+        p = E[i]
+        T[p[0]].append(p[1])
+        ans = n
+        vis = [0 for _ in range(n)]
+        pos = [-1 for _ in range(n)]
+        for j in range(n):
+            ans = min(ans,topo_sort(j))
+        if ans == -1:
+            print(f"Inconsistency found after {i+1} relations.")
+            break
+        elif ans == 0:
+            print(f'Sorted sequence determined after {i+1} relations: {"".join([chr(topo[k]+ord("A")) for k in range(n)])}.')
+            break
+    if ans > 0:
+        print("Sorted sequence cannot be determined.")
+
+
+
+
+#最大连通区域
 from collections import deque
 class Graph:
     def __init__(self,grid):
@@ -37,7 +119,8 @@ for _ in range(T):
     result = max_connected_area(grid)
     print(result)
 
-bfs象棋，马
+
+#bfs象棋，马
 from collections import deque
 sx,sy = map(int,input().split())
 ex,ey = map(int,input().split())
