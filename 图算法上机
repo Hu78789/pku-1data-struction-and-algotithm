@@ -32,50 +32,43 @@ A<Z
 Sorted sequence determined after 4 relations: ABCD.
 Inconsistency found after 2 relations.
 Sorted sequence cannot be determined.
-def topo_sort(v):
-    global vis,pos,T,topo
-    if vis[v] == -1:
-        return -1
-    if pos[v] != -1:
-        return pos[v]
-    vis[v] = -1
-    p = n
-    for i in range(len(T[v])):
-        p = min(p,topo_sort(T[v][i]))
-        if p == -1:
-            return -1
-    topo[p-1] = v
-    pos[v],vis[v] = p-1,0
-    return p-1
-
-
+from collections import deque
+def topo_sort(graph):
+    in_degree = {u:0 for u in graph}
+    for u in graph:
+        for v in graph[u]:
+            in_degree[v] += 1
+    q = deque([u for u in in_degree if in_degree[u] == 0])
+    topo_order = [];flag = True
+    while q:
+        if len(q) > 1:
+            flag = False#topo_sort不唯一确定
+        u = q.popleft()
+        topo_order.append(u)
+        for v in graph[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                q.append(v)
+    if len(topo_order) != len(graph): return 0
+    return topo_order if flag else None
 while True:
     n,m = map(int,input().split())
-    if n == m == 0:
-        break
-    T = [[] for _ in range(n)]
-    E = []
-    for _ in range(m):
-        s = input()
-        E.append([ord(s[0])-ord('A'),ord(s[2])-ord('A')])
-    topo = [0 for _ in range(n)]
+    if n == 0: break
+    graph = {chr(x+65):[] for x in range(n)}
+    edges = [tuple(input().split('<')) for _ in range(m)]
     for i in range(m):
-        p = E[i]
-        T[p[0]].append(p[1])
-        ans = n
-        vis = [0 for _ in range(n)]
-        pos = [-1 for _ in range(n)]
-        for j in range(n):
-            ans = min(ans,topo_sort(j))
-        if ans == -1:
-            print(f"Inconsistency found after {i+1} relations.")
+        a,b = edges[i]
+        graph[a].append(b)
+        t = topo_sort(graph)
+        if t:
+            s = ''.join(t)
+            print("Sorted sequence determined after {} relations: {}.".format(i+1,s))
             break
-        elif ans == 0:
-            print(f'Sorted sequence determined after {i+1} relations: {"".join([chr(topo[k]+ord("A")) for k in range(n)])}.')
+        elif t == 0:
+            print("Inconsistency found after {} relations.".format(i+1))
             break
-    if ans > 0:
+    else:
         print("Sorted sequence cannot be determined.")
-
 
 
 
