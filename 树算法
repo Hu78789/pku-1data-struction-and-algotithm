@@ -1,3 +1,44 @@
+#树的镜像转换
+class TreeNode:
+    def __init__(self,value):
+        self.value = value
+        self.left = None
+        self.right = None
+        self.children = []
+        self.parent = None
+#用栈前序建树
+stack = []
+nodes = []
+n = int(input())
+alist = list(input().split())
+for x in alist:
+    temp = TreeNode(x[0])
+    nodes.append(temp)
+    if stack:
+        if stack[-1].left:
+            stack[-1].right = temp
+            stack.pop()
+        else:
+            stack[-1].left = temp
+    if x[1] == "0":
+        stack.append(temp)
+#2-->多：左孩子右兄弟
+for x in nodes:
+    if x.left and x.left.value != "$":
+        x.children.append(x.left)
+        x.left.parent = x
+    if x.right and x.right.value != "$":
+        x.parent.children.append(x.right)
+        x.right.parent = x.parent
+for x in nodes:
+    x.children = x.children[::-1]
+lst1 = [nodes[0]]
+for x in lst1:
+    if x.children:
+        lst1+=x.children
+print(" ".join([x.value for x in lst1]))
+
+
 #括号嵌套树
 
 class TreeNode:
