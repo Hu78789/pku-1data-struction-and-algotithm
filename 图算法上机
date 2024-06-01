@@ -503,127 +503,47 @@ while True:
     if n==0 and m==0:
         break
     main(n,m)
-//Dijskra算法
-#include <iostream>
-using namespace std;
-#include <bits/stdc++.h>
-const long long INF = 0x3f3f3f3f3f3f3f3fLL;
-const int N = 3e5 + 2;
-struct edge{
-  int from,to;
-  long long w;
-  edge(int a,int b,long long c){from = a;to=b;w=c;}
-};
-vector <edge> e[N];//存图e->E
-struct node{
-    int id; long long n_dis;
-    node(int b,long long c){id = b;n_dis=c;}
-    bool operator < (const node &a) const{return n_dis > a.n_dis;}
-};
-int n,m;
-int pre[N];
-//print s-->t path
-void print_path(int s,int t){
-    if(s==t){printf("%d",s);return;}
-    print_path(s,pre[t]);
-    printf("%d",t);
-}
-long long dis[N];
-bool done[N];
-void dijkstra(){
-    int s=1;
-    //初始化
-    for (int i=1;i<=n;i++){
-        dis[i] = INF; done[i] = false;
-    }
-    dis[s] = 0;
-    priority_queue<node>Q;
-    Q.push(node(s,dis[s]));
-    while (!Q.empty()){
-        node u = Q.top();
-        Q.pop();
-        if(done[u.id]) continue;
-        done[u.id] = true;
-        for(int i=0;i<e[u.id].size();i++){
-            edge y = e[u.id][i];
-            if (done[y.to]) continue;
-            if (dis[y.to]>y.w+u.n_dis){
-                dis[y.to] = y.w + u.n_dis;
-                Q.push(node(y.to,dis[y.to]));
-                pre[y.to] = u.id;
-            }
 
-        }
-    }
+#地铁：dijskra
+import math
+import heapq
 
-}
-
-int main()
-{
-  scanf("%d%d",&n,&m);
-  for(int i=1;i<=n;i++) e[i].clear();
-  while(m--){
-    int u,v,w; cin>>u>>v>>w;
-    e[u].push_back(edge(u,v,w));
-    }
-  dijkstra();
-  for(int i=1;i<=n;i++){
-    if(dis[i]>=INF) cout<<"-1 ";
-    else printf("%lld ",dis[i]);
-  }  
-
-  return 0;
-}
-//kruskal算法
-#include <bits/stdc++.h>
-using namespace std;
-int n,m;
-const int N = 5005,M = 2e5+5;
-struct edge{
-    int from;
-    int to;
-    int w;
-    edge(int a,int b,int c){from=a;to=b;w=c;}
-    edge(){}
-}edges[M];
-bool cmp(edge a,edge b){return a.w < b.w;}//从小到大排序
-int s[N];//Disjoint_set
-int find_set(int x){
-  if(x!=s[x]){
-      //t = s[x];
-      s[x] = find_set(s[x]);
-    }
-    return s[x];
-}
-
-void kruskal(){
-    sort(edges+1,edges+m+1,cmp);
-    for (int i=1;i<=n;i++) s[i] = i;
-    int ans=0,cnt=0;
-    for(int i=1;i<=m;i++){
-      if(cnt==n-1) break;
-      int e1 = find_set(edges[i].from);
-      int e2 = find_set(edges[i].to);
-      if (e1==e2) continue;
-      else{
-        ans+=edges[i].w;
-        s[e1] = e2;
-        cnt++;
-        cout<<cnt;
-        cout<<edges[i].from<<edges[i].to;
-        
-      }
-
-    }
-    if (cnt==n-1) cout<<ans;
-    else cout<<"orz";
-}
-int main(){
-    cin>>n>>m;
-    for(int i=1;i<=m;i++) cin>>edges[i].from>>edges[i].to>>edges[i].w;
-    kruskal();
-    return 0;
-}
-
-
-
+def get_distance(x1,y1,x2,y2):
+    return math.sqrt((x1-x2)**2+(y1-y2)**2)
+sx,sy,ex,ey = map(int,input().split())
+min_time = {}
+rails = set()
+while True:
+    try:
+        rail = list(map(int,input().split()))
+        if not rail:
+            break
+        if rail == [-1,-1]:
+            break
+        stations = [(rail[2*i],rail[2*i+1]) for i in range(len(rail)//2-1)]
+        for j,station in enumerate(stations):
+            min_time[station] = float("inf")
+            if j != len(stations)-1:
+                rails.add((station,stations[j+1]))
+                rails.add((stations[j+1],station))
+    except EOFError:
+        break
+min_time[(sx,sy)],min_time[(ex,ey)] =0,float("inf")
+min_heap = [(0,sx,sy)]
+while min_heap:
+    cur_time,x,y = heapq.heappop(min_heap)
+    if cur_time > min_time[(x,y)]:
+        continue
+    if (x,y) == (ex,ey):
+        break
+    for position in min_time.keys():
+        if position == (x,y):
+            continue
+        nx,ny = position
+        dis = get_distance(x,y,nx,ny)
+        rail_factor = 4 if (position,(x,y)) in rails or ((x,y),position) in rails else 1
+        new_time = cur_time + dis/(10000*rail_factor)
+        if new_time < min_time[position]:
+            min_time[position] = new_time
+            heapq.heappush(min_heap,(new_time,nx,ny))
+print(round(min_time[(ex,ey)]*60))
