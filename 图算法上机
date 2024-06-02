@@ -1,3 +1,132 @@
+02488：骑士之旅
+查看提交统计提问
+总时间限制： 1000ms 内存限制： 65536kB
+描述
+背景
+骑士厌倦了一次又一次地看到相同的黑白方块，并决定
+环游世界。每当骑士移动时，它都是一个方向上的两个方格和一个垂直于此方向的方格。骑士的世界就是他赖以生存的棋盘。我们的骑士生活在一个象棋盘上，棋盘的面积比普通的 8 * 8 棋盘小，但它仍然是矩形的。你能帮助这位喜欢冒险的骑士制定旅行计划吗？
+
+问题：
+找到一条路径，让骑士访问每个方格一次。骑士可以在棋盘的任何方格上开始和结束。
+输入
+输入从第一行的正整数 n 开始。以下行包含 n 个测试用例。每个测试用例由一条带有两个正整数 p 和 q 的行组成，使得 1 <= p * q <= 26。这表示一个 p * q 棋盘，其中 p 描述存在多少个不同的平方数 1， . . . ， p，q 描述存在多少个不同的平方字母。这些是拉丁字母表的前 q 字母：A、. . .
+输出
+每个方案的输出都以包含“方案 #i：” 的行开头，其中 i 是从 1 开始的方案编号。然后打印一行，其中包含字典上的第一条路径，该路径以骑士步法访问棋盘的所有方格，然后是空行。路径应通过连接访问的方块的名称在一行上给出。每个方块名称由一个大写字母后跟一个数字组成。
+如果不存在这样的路径，则应在单行上输出不可能。
+样例输入
+3
+1 1
+2 3
+4 3
+样例输出
+Scenario #1:
+A1
+
+Scenario #2:
+impossible
+
+Scenario #3:
+A1B3C1A2B4C2A3B1C3A4B2C4
+#-------------------------------------------------------------
+move = [(-2,-1),(-2,1),(-1,2),(-1,-2),(1,-2),(1,2),(2,-1),(2,1)]
+def dfs(x,y,step,p,q,visited,ans):
+    if step == p*q:
+        return True
+    for i in range(8):
+        dx,dy = move[i]
+        nx,ny =x+dx,y+dy
+        if 0<=nx<q and 0<=ny<p and not visited[nx][ny]:
+            visited[nx][ny] = True
+            ans[step] = chr(nx+65) + str(ny+1)
+            if dfs(nx,ny,step+1,p,q,visited,ans):
+                return True
+            visited[nx][ny] = False#回溯
+    return False
+n = int(input())
+for m in range(1,n+1):
+    p,q = map(int,input().split())
+    ans = ["" for _ in range(p*q)]
+    visited = [[False]*(p+1) for _ in range(q+1)]
+    visited[0][0] = True
+    ans[0] = "A1"
+    if dfs(0,0,1,p,q,visited,ans):
+        result = "".join(ans)
+    else:
+        result = "impossible"
+    print(f"Scenario #{m}:")
+    print(result)
+    print()
+#骑士周游启发性关键算法
+
+def knight_graph(board_size):
+    kt_graph = Graph()
+    for row in range(board_size):           #遍历每一行
+        for col in range(board_size):       #遍历行上的每一个格子
+            node_id = pos_to_node_id(row, col, board_size) #把行、列号转为格子ID
+            new_positions = gen_legal_moves(row, col, board_size) #按照 马走日，返回下一步可能位置
+            for row2, col2 in new_positions:
+                other_node_id = pos_to_node_id(row2, col2, board_size) #下一步的格子ID
+                kt_graph.add_edge(node_id, other_node_id) #在骑士周游图中为两个格子加一条边
+    return kt_graph
+
+
+def knight_tour(n, path, u, limit):
+    u.color = "gray"
+    path.append(u)              #当前顶点涂色并加入路径
+    if n < limit:
+        neighbors = ordered_by_avail(u) #对所有的合法移动依次深入
+        #neighbors = sorted(list(u.get_neighbors()))
+        i = 0
+
+        for nbr in neighbors:
+            if nbr.color == "white" and \
+                knight_tour(n + 1, path, nbr, limit):   #选择“白色”未经深入的点，层次加一，递归深入
+                return True
+        else:                       #所有的“下一步”都试了走不通
+            path.pop()              #回溯，从路径中删除当前顶点
+            u.color = "white"       #当前顶点改回白色
+            return False
+    else:
+        return True
+
+def ordered_by_avail(n):
+    res_list = []
+    for v in n.get_neighbors():
+        if v.color == "white":
+            c = 0
+            for w in v.get_neighbors():
+                if w.color == "white":
+                    c += 1
+            res_list.append((c,v))
+    res_list.sort(key = lambda x: x[0])
+    return [y[1] for y in res_list]
+
+# class DFSGraph(Graph):
+#     def __init__(self):
+#         super().__init__()
+#         self.time = 0                   #不是物理世界，而是算法执行步数
+# 
+#     def dfs(self):
+#         for vertex in self:
+#             vertex.color = "white"      #颜色初始化
+#             vertex.previous = -1
+#         for vertex in self:             #从每个顶点开始遍历
+#             if vertex.color == "white":
+#                 self.dfs_visit(vertex)  #第一次运行后还有未包括的顶点
+#                                         # 则建立森林
+# 
+#     def dfs_visit(self, start_vertex):
+#         start_vertex.color = "gray"
+#         self.time = self.time + 1       #记录算法的步骤
+#         start_vertex.discovery_time = self.time
+#         for next_vertex in start_vertex.get_neighbors():
+#             if next_vertex.color == "white":
+#                 next_vertex.previous = start_vertex
+#                 self.dfs_visit(next_vertex)     #深度优先递归访问
+#         start_vertex.color = "black"
+#         self.time = self.time + 1
+#         start_vertex.closing_time = self.time
+
 01094：整理一切
 查看提交统计提问
 总时间限制： 1000ms 内存限制： 65536kB
