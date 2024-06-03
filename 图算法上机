@@ -771,6 +771,7 @@ def find_critical_activities(n,m,edges):
     return T,critical_activities
 
 
+
 n,m = map(int,input().split())
 edges = [list(map(int,input().split())) for _ in range(m)]
 T,critical_activities = find_critical_activities(n,m,edges)
