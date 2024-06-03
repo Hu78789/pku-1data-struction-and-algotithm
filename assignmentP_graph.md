@@ -847,6 +847,820 @@ for a in critical_activities:
             heapq.heappush(min_heap,(new_time,nx,ny))
 print(round(min_time[(ex,ey)]*60))
 ```
+###22460:火星车勘探
+查看提交统计提问
+总时间限制: 1000ms 内存限制: 65535kB
+描述
+火星这颗自古以来寄托了中国人无限遐思的红色星球，如今第一次留下了中国人的印迹。2021年5月15日，“天问一号”探测器成功降落在火星预选着陆区。这标志着中国首次火星探测着陆任务取得成功，同时也使中国成为继美国之后第二个实现探测器着陆火星的国家。
+
+假设火星车需要对形如二叉树的地形进行遍历勘察。火星车初始处于二叉树地形的根节点，对二叉树进行前序遍历。当火星车遇到非空节点时，则采样一定量的泥土样本，记录下样本数量；当火星车遇到空节点，使用一个标记值#进行记录。
+
+
+
+对上面的二叉树地形可以前序遍历得到 9 3 4 # # 1 # # 2 # 6 # #，其中 # 代表一个空节点，整数表示在该节点采样的泥土样本数量。
+
+我们的任务是，给定一串以空格分隔的序列，验证它是否是火星车对于二叉树地形正确的前序遍历结果。
+
+输入
+每组输入包含多个测试数据，每个测试数据由两行构成。
+每个测试数据的第一行：1个正整数N，表示遍历结果中的元素个数。
+每个测试数据的第二行：N个以空格分开的元素，每个元素可以是#，也可以是小于100的正整数。(1<=N<=200000)
+输入的最后一行为0，表示输入结束。
+输出
+对于每个测试数据，输出一行判断结果。
+输入的序列如果是对某个二叉树的正确的前序遍历结果，则输出“T”，否则输出“F”。
+样例输入
+13
+9 3 4 # # 1 # # 2 # 6 # #
+4
+9 # # 1
+2
+# 99
+0
+样例输出
+T
+F
+F
+```python
+class Node:
+    def __init__(self,key):
+        self.key = key
+        self.left = None
+        self.right = None
+#根据前序建树
+def build_tree(s):
+    root = Node(s.pop())
+    if root.key != "#":
+        root.left = build_tree(s)
+        root.right = build_tree(s)
+    return root
+while True:
+    try:
+        n = int(input())
+        if n == 0:
+            break
+        s = input().split()[::-1]
+        _ = build_tree(s)
+        print("F" if len(s) else "T")
+    except IndexError:
+        print("F")
+```
+###02775:文件结构“图”
+查看提交统计提问
+总时间限制: 1000ms 内存限制: 65536kB
+描述
+在计算机上看到文件系统的结构通常很有用。Microsoft Windows上面的"explorer"程序就是这样的一个例子。但是在有图形界面之前，没有图形化的表示方法的，那时候最好的方式是把目录和文件的结构显示成一个"图"的样子，而且使用缩排的形式来表示目录的结构。比如：
+
+
+ROOT
+|     dir1
+|     file1
+|     file2
+|     file3
+|     dir2
+|     dir3
+|     file1
+file1
+file2
+这个图说明：ROOT目录包括三个子目录和两个文件。第一个子目录包含3个文件，第二个子目录是空的，第三个子目录包含一个文件。
+
+输入
+你的任务是写一个程序读取一些测试数据。每组测试数据表示一个计算机的文件结构。每组测试数据以'*'结尾，而所有合理的输入数据以'#'结尾。一组测试数据包括一些文件和目录的名字（虽然在输入中我们没有给出，但是我们总假设ROOT目录是最外层的目录）。在输入中,以']'表示一个目录的内容的结束。目录名字的第一个字母是'd'，文件名字的第一个字母是'f'。文件名可能有扩展名也可能没有（比如fmyfile.dat和fmyfile）。文件和目录的名字中都不包括空格,长度都不超过30。一个目录下的子目录个数和文件个数之和不超过30。
+输出
+在显示一个目录中内容的时候，先显示其中的子目录（如果有的话），然后再显示文件（如果有的话）。文件要求按照名字的字母表的顺序显示（目录不用按照名字的字母表顺序显示，只需要按照目录出现的先后显示）。对每一组测试数据，我们要先输出"DATA SET x:"，这里x是测试数据的编号（从1开始）。在两组测试数据之间要输出一个空行来隔开。
+
+你需要注意的是，我们使用一个'|'和5个空格来表示出缩排的层次。
+样例输入
+file1
+file2
+dir3
+dir2
+file1
+file2
+]
+]
+file4
+dir1
+]
+file3
+*
+file2
+file1
+*
+#
+样例输出
+DATA SET 1:
+ROOT
+|     dir3
+|     |     dir2
+|     |     file1
+|     |     file2
+|     dir1
+file1
+file2
+file3
+file4
+
+DATA SET 2:
+ROOT
+file1
+file2
+提示
+一个目录和它的子目录处于不同的层次
+一个目录和它的里面的文件处于同一层次
+```python
+from sys import exit
+def print_dirs(root):
+    tap = "|     "
+    print(tap*root.level+root.name)
+    for nbr in root.dirs:
+        print_dirs(nbr)
+    for file in sorted(root.files):
+        print(tap*root.level+file)
+    return
+class dirs:
+    def __init__(self,name,level):
+        self.name = name
+        self.dirs = []
+        self.files = []
+        self.level = level
+flag = True
+count = 0
+ans = []
+while flag:
+    count+=1
+    root = dirs("ROOT",0)
+    stack_dirs = [root]
+    while (s := input()) != "*":
+        if s[0] == "f":
+            if stack_dirs:
+                stack_dirs[-1].files.append(s)
+        if s[0] == "d":
+          new_dir = dirs(s,stack_dirs[-1].level+1)
+          stack_dirs[-1].dirs.append(new_dir)
+          stack_dirs.append(new_dir)
+        if s == "]" and stack_dirs:
+            stack_dirs.pop()
+        if s == "#":
+            flag = False
+            exit(0)
+    print(f"DATA SET {count}:")
+    print_dirs(root)
+    print()
+```
+04082:树的镜面映射
+查看提交统计提问
+总时间限制: 1000ms 内存限制: 65536kB
+描述
+一棵树的镜面映射指的是对于树中的每个结点，都将其子结点反序。例如，对左边的树，镜面映射后变成右边这棵树。
+
+    a                             a
+  / | \                         / | \
+ b  c  f       ===>            f  c  b
+   / \                           / \
+  d   e                         e   d
+我们在输入输出一棵树的时候，常常会把树转换成对应的二叉树，而且对该二叉树中只有单个子结点的分支结点补充一个虚子结点“$”，形成“伪满二叉树”。
+
+例如，对下图左边的树，得到下图右边的伪满二叉树
+
+    a                             a
+  / | \                          / \
+ b  c  f       ===>             b   $
+   / \                         / \
+  d   e                       $   c                          
+                                 / \
+                                d   f
+                               / \
+                              $   e
+然后对这棵二叉树进行前序遍历，如果是内部结点则标记为0，如果是叶结点则标记为1，而且虚结点也输出。
+
+现在我们将一棵树以“伪满二叉树”的形式输入，要求输出这棵树的镜面映射的宽度优先遍历序列。
+
+输入
+输入包含一棵树所形成的“伪满二叉树”的前序遍历。
+第一行包含一个整数，表示结点的数目。
+第二行包含所有结点。每个结点用两个字符表示，第一个字符表示结点的编号，第二个字符表示该结点为内部结点还是外部结点，内部结点为0，外部结点为1。结点之间用一个空格隔开。
+数据保证所有结点的编号都为一个小写字母。
+输出
+输出包含这棵树的镜面映射的宽度优先遍历序列，只需要输出每个结点的编号，编号之间用一个空格隔开。
+样例输入
+9
+a0 b0 $1 c0 d0 $1 e1 f1 $1
+样例输出
+a f c b e d
+#树的镜像转换
+```python
+class TreeNode:
+    def __init__(self,value):
+        self.value = value
+        self.left = None
+        self.right = None
+        self.children = []
+        self.parent = None
+#用栈前序建树
+stack = []
+nodes = []
+n = int(input())
+alist = list(input().split())
+for x in alist:
+    temp = TreeNode(x[0])
+    nodes.append(temp)
+    if stack:
+        if stack[-1].left:
+            stack[-1].right = temp
+            stack.pop()
+        else:
+            stack[-1].left = temp
+    if x[1] == "0":
+        stack.append(temp)
+#2-->多：左孩子右兄弟
+for x in nodes:
+    if x.left and x.left.value != "$":
+        x.children.append(x.left)
+        x.left.parent = x
+    if x.right and x.right.value != "$":
+        x.parent.children.append(x.right)
+        x.right.parent = x.parent
+for x in nodes:
+    x.children = x.children[::-1]
+lst1 = [nodes[0]]
+for x in lst1:
+    if x.children:
+        lst1+=x.children
+print(" ".join([x.value for x in lst1]))
+```
+
+#括号嵌套树
+```python
+class TreeNode:
+    def __init__(self,value):
+        self.value = value
+        self.children = []
+def parse_tree(s):
+    stack = []
+    node = None
+    for char in s:
+        if char.isalpha():
+            node = TreeNode(char)
+            if stack:
+                stack[-1].children.append(node)
+        elif char == '(':
+            if node:
+                stack.append(node)
+        elif char == ')':
+            if stack:
+                node = stack.pop()
+    return node
+def preorder(node):
+    output = [node.value]
+    for c in node.children:
+        output.extend(preorder(c))
+    return ''.join(output)
+def postorder(node):
+    output = []
+    for child in node.children:
+        output.extend(postorder(child))
+    output.append(node.value)
+    return ''.join(output)
+def main():
+    s = input().strip()
+    s = ''.join(s.split())
+    root = parse_tree(s)
+    if root:
+        print(preorder(root))
+        print(postorder(root))
+    else:
+        print("input tree string error!")
+if __name__ == "__main__":
+    main()
+```
+###03720:文本二叉树
+查看提交统计提问
+总时间限制: 1000ms 内存限制: 65536kB
+描述
+如上图，一棵每个节点都是一个字母，且字母互不相同的二叉树，可以用以下若干行文本表示:
+A
+-B
+--*
+--C
+-D
+--E
+---*
+---F
+在这若干行文本中：
+
+1) 每个字母代表一个节点。该字母在文本中是第几行，就称该节点的行号是几。根在第1行
+2) 每个字母左边的'-'字符的个数代表该结点在树中的层次（树根位于第0层）
+3) 若某第 i 层的非根节点在文本中位于第n行，则其父节点必然是第 i-1 层的节点中，行号小于n,且行号与n的差最小的那个
+4) 若某文本中位于第n行的节点(层次是i) 有两个子节点，则第n+1行就是其左子节点，右子节点是n+1行以下第一个层次为i+1的节点
+5) 若某第 i 层的节点在文本中位于第n行，且其没有左子节点而有右子节点，那么它的下一行就是 i+1个'-' 字符再加上一个 '*'
+
+
+给出一棵树的文本表示法，要求输出该数的前序、后序、中序遍历结果
+输入
+第一行是树的数目 n
+
+接下来是n棵树，每棵树以'0'结尾。'0'不是树的一部分
+每棵树不超过100个节点
+输出
+对每棵树，分三行先后输出其前序、后序、中序遍历结果
+两棵树之间以空行分隔
+样例输入
+2
+A
+-B
+--*
+--C
+-D
+--E
+---*
+---F
+0
+A
+-B
+-C
+0
+样例输出
+ABCDEF
+CBFEDA
+BCAEFD
+
+ABC
+BCA
+BAC
+```python
+#数组存树+遍历
+class Node:
+    def __init__(self,value,depth):
+        self.value = value
+        self.depth = depth
+        self.left = None
+        self.right = None
+    def preorder_traversal(self):
+        nodes = [self.value]
+        if self.left and self.left.value != '*':
+            nodes += self.left.preorder_traversal()
+        if self.right and self.right.value != '*':
+            nodes += self.right.preorder_traversal()
+        return nodes
+    def inorder_traversal(self):
+        nodes = []
+        if self.left and self.left.value != '*':
+            nodes += self.left.inorder_traversal()
+        nodes.append(self.value)
+        if self.right and self.right.value != '*':
+            nodes += self.right.inorder_traversal()
+        return nodes
+    def postorder_traversal(self):
+        nodes = []
+        if self.left and self.left.value != '*':
+            nodes += self.left.postorder_traversal()
+
+        if self.right and self.right.value != '*':
+            nodes += self.right.postorder_traversal()
+        nodes.append(self.value)
+        return nodes
+
+
+def build_tree():
+    n = int(input())
+    for _ in range(n):
+        tree = []
+        stack = []
+        while True:
+            s = input()
+            if s == '0':
+                break
+            depth = len(s)-1
+            node = Node(s[-1],depth)
+            tree.append(node)
+            # Finding the parent for the current node
+            #stack为单调栈存索引
+            while stack and tree[stack[-1]].depth >= depth:
+                stack.pop()
+            if stack:
+                parent = tree[stack[-1]]
+                if not parent.left:
+                    parent.left = node
+                else:
+                    parent.right = node
+            stack.append(len(tree)-1)
+        yield tree[0]
+for root in build_tree():
+    print("".join(root.preorder_traversal()))
+    print("".join(root.postorder_traversal()))
+    print("".join(root.inorder_traversal()))
+    print()
+```
+```python
+05430:表达式·表达式树·表达式求值
+查看提交统计提问
+总时间限制: 1000ms 内存限制: 65535kB
+描述
+众所周知，任何一个表达式，都可以用一棵表达式树来表示。例如，表达式a+b*c，可以表示为如下的表达式树：
+
+   +
+  / \
+a   *
+    / \
+    b c
+
+现在，给你一个中缀表达式，这个中缀表达式用变量来表示（不含数字），请你将这个中缀表达式用表达式二叉树的形式输出出来。
+
+输入
+输入分为三个部分。
+第一部分为一行，即中缀表达式(长度不大于50)。中缀表达式可能含有小写字母代表变量（a-z），也可能含有运算符（+、-、*、/、小括号），不含有数字，也不含有空格。
+第二部分为一个整数n(n < 10)，表示中缀表达式的变量数。
+第三部分有n行，每行格式为C　x，C为变量的字符，x为该变量的值。
+输出
+输出分为三个部分，第一个部分为该表达式的逆波兰式，即该表达式树的后根遍历结果。占一行。
+第二部分为表达式树的显示，如样例输出所示。如果该二叉树是一棵满二叉树，则最底部的叶子结点，分别占据横坐标的第1、3、5、7……个位置（最左边的坐标是1），然后它们的父结点的横坐标，在两个子结点的中间。如果不是满二叉树，则没有结点的地方，用空格填充（但请略去所有的行末空格）。每一行父结点与子结点中隔开一行，用斜杠（/）与反斜杠（\）来表示树的关系。/出现的横坐标位置为父结点的横坐标偏左一格，\出现的横坐标位置为父结点的横坐标偏右一格。也就是说，如果树高为m，则输出就有2m-1行。
+第三部分为一个整数，表示将值代入变量之后，该中缀表达式的值。需要注意的一点是，除法代表整除运算，即舍弃小数点后的部分。同时，测试数据保证不会出现除以0的现象。
+import operator as op
+class Node:
+    def __init__(self,x):
+        self.value = x
+        self.left = None
+        self.right = None
+dict_priority={"*":2,"/":2,"+":1,"-":1,")":0,"(":0}
+def infix_trans(infix):
+    postfix = []
+    op_stack = []
+    for char in infix:
+        if char.isalpha():
+            postfix.append(char)
+        else:
+            if char == '(':
+                op_stack.append(char)
+            elif char == ')':
+                while op_stack and op_stack[-1] != '(':
+                    postfix.append(op_stack.pop())
+                op_stack.pop()
+            else:
+                while op_stack and dict_priority[op_stack[-1]]>=dict_priority[char] and op_stack != '(':
+                    postfix.append(op_stack.pop())
+                op_stack.append(char)
+    while op_stack:
+        postfix.append(op_stack.pop())
+    return postfix
+def build_tree(postfix):
+    stack = []
+    for item in postfix:
+        if item in '+-*/':
+            node = Node(item)
+            node.right = stack.pop()
+            node.left = stack.pop()
+        else:
+            node = Node(item)
+        stack.append(node)
+    return stack[0]
+def get_val(expr_tree,var_vals):
+    if expr_tree.value in '+-*/':
+        operator = {'+':op.add,'-':op.sub,'*':op.mul,'/':op.floordiv}
+        return operator[expr_tree.value](get_val(expr_tree.left,var_vals),get_val(expr_tree.right,var_vals))
+    else:
+        return var_vals[expr_tree.value]
+def getDepth(tree_root):
+    left_depth = getDepth(tree_root.left) if tree_root.left else 0
+    right_depth = getDepth(tree_root.right) if tree_root.right else 0
+    return max(left_depth,right_depth) + 1
+def printExpressionTree(tree_root,d):
+    graph = [" "*(2**d-1)+tree_root.value + " "*(2**d-1)]
+    graph.append(" "*(2**d-2)+("/" if tree_root.left else " ")+
+                 " "+("\\"if tree_root.right else " ")+" "*(2**d-2))
+    if d == 0:
+        return tree_root.value
+    d-=1
+    if tree_root.left:
+        left = printExpressionTree(tree_root.left,d)
+    else:
+        left = [" "*(2**(d+1)-1)]*(2*d+1)
+    right = printExpressionTree(tree_root.right,d) if tree_root.right else [
+        " "*(2**(d+1)-1)]*(2*d+1)
+    for i in range(2*d+1):
+        graph.append(left[i] + " " + right[i])
+    return graph
+
+infix = input().strip()
+n = int(input())
+vars_value={}
+for i in range(n):
+    char,num = input().split()
+    vars_value[char] = int(num)
+postfix = infix_trans(infix)
+tree_root = build_tree(postfix)
+print(''.join(str(x) for x in postfix))
+expression_value = get_val(tree_root, vars_value)
+
+
+for line in printExpressionTree(tree_root, getDepth(tree_root)-1):
+    print(line.rstrip())
+
+
+print(expression_value)
+```python
+27638:求二叉树的高度和叶子数目
+查看提交统计提问
+总时间限制: 1000ms 内存限制: 65536kB
+描述
+给定一棵二叉树，求该二叉树的高度和叶子数目二叉树高度定义：从根结点到叶结点依次经过的结点（含根、叶结点）形成树的一条路径，最长路径的结点数减1为树的高度。只有一个结点的二叉树，高度是0。
+
+输入
+第一行是一个整数n，表示二叉树的结点个数。二叉树结点编号从0到n-1，根结点n <= 100 接下来有n行，依次对应二叉树的编号为0,1,2....n-1的节点。 每行有两个整数，分别表示该节点的左儿子和右儿子的编号。如果第一个（第二个）数为-1则表示没有左（右）儿子
+输出
+在一行中输出2个整数，分别表示二叉树的高度和叶子结点个数
+class TreeNode:
+    def __init__(self):
+        self.left = None
+        self.right = None
+n = int(input())
+exist_parents = [False]*n
+forest = [TreeNode() for i in range(n)]
+root_index = 0
+def tree_height(root):
+    if not root:
+        return -1
+    else:
+        return 1 + max(tree_height(root.left),tree_height(root.right))
+for i in range(n):
+    left,right = map(int,input().split())
+    if right != -1:
+        forest[i].right = forest[right]
+        exist_parents[right] = True
+    if left != -1:
+        forest[i].left = forest[left]
+        exist_parents[left] = True
+for i in range(n):
+    if not exist_parents[i]:
+        root_index = i
+        break
+def count_leaves(root):
+    if not root:
+        return 0
+    if root.left is None and root.right is None:
+        return 1
+    else:
+        return count_leaves(root.left) + count_leaves(root.right)
+height = tree_height(forest[root_index])
+leaves = count_leaves(forest[root_index])
+print(f'{height} {leaves}')
+```
+
+```python
+#前缀树，26叉树
+class TrieNode:
+    def __init__(self):
+        self.child = {}
+        self.is_end = 0
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+    def insert(self,nums):
+        curNode = self.root
+        for x in nums:
+            if x not in curNode.child:
+                curNode.child[x] = TrieNode()
+            curNode = curNode.child[x]
+        curNode.is_end = 1
+
+    def search(self,num):
+        curnode = self.root
+        for x in num:
+            if x not in curnode.child:
+                return 0
+            curnode = curnode.child[x]
+        return 1
+t = int(input())
+p=[]
+for _ in range(t):
+    n = int(input())
+    nums = []
+    for _ in range(n):
+        nums.append(str(input()))
+    nums.sort(reverse=True)
+    s = 0
+    trie = Trie()
+    for num in nums:
+        s += trie.search(num)
+        trie.insert(num)
+    if s > 0:
+        print('NO')
+    else:
+        print('YES')
+```
+```
+#树序转换  前中-->后
+class TreeNode:
+    def __init__(self,value):
+        self.value = value
+        self.left = None
+        self.right = None
+def build_tree(preorder,inorder):
+    if not preorder or not inorder:
+        return None
+    root = TreeNode(preorder[0])
+    root_index = inorder.index(root.value)
+    root.left = build_tree(preorder[1:1+root_index],inorder[:root_index])
+    root.right = build_tree(preorder[1+root_index:],inorder[root_index+1:])
+    return root
+def postTraverse(root):
+    res=[]
+    if root.left:
+        res.extend(postTraverse(root.left))
+    if root.right:
+        res.extend(postTraverse(root.right))
+    res.append(root.value)
+    return res
+
+def main():
+    preorder = list(input())
+    inorder = list(input())
+    root = build_tree(preorder,inorder)
+    print(''.join(postTraverse(root)))
+
+
+while True:
+    try:
+        main()
+    except EOFError:
+        break
+```
+01760：磁盘树
+查看提交统计提问
+总时间限制： 1000ms 内存限制： 65536kB
+描述
+黑客比尔不小心丢失了工作站硬盘上的所有信息，并且他没有其内容的备份副本。他并不后悔丢失文件本身，而是后悔他在多年的工作中创建和珍惜的非常漂亮和方便的目录结构。幸运的是，比尔的硬盘上有几份目录列表的副本。使用这些列表，他能够恢复某些目录的完整路径（如“WINNT\SYSTEM32\CERTSRV\CERTCO~1\X86”）。他把他找到的每条路径都写在一个单独的行上，把它们都放在一个文件中。你的任务是编写一个程序，通过提供格式良好的目录树来帮助 Bill 恢复他最先进的目录结构。
+输入
+输入文件的第一行包含单个整数 N （1 <= N <= 500），表示不同目录路径的总数。然后是带有目录路径的 N 行。每个目录路径占用一行，不包含任何空格，包括前导或尾随空格。任何路径都不超过 80 个字符。每个路径列出一次，由多个目录名称组成，这些目录名称由反斜杠 （“\”） 分隔。
+
+每个目录名称由 1 到 8 个大写字母、数字或以下列表中的特殊字符组成：感叹号、数字符号、美元符号、百分号、与号、撇号、左括号和右括号、连字符号、商业 at、回旋重音、下划线、重音、左大括号和右大括号以及波浪号 （“！#$%&'（）-@^_'{}~”）。
+输出
+将格式化的目录树写入输出文件。每个目录名称都应列在自己的行上，前面有若干空格，以指示其在目录层次结构中的深度。子目录应按词典顺序列在其父目录之后，前面应比其父目录多一个空格。顶级目录的名称前不得标有空格，并应按词典顺序列出。有关输出格式的说明，请参阅下面的示例。
+样例输入
+7
+WINNT\SYSTEM32\CONFIG
+GAMES
+WINNT\DRIVERS
+HOME
+WIN\SOFT
+GAMES\DRIVERS
+WINNT\SYSTEM32\CERTSRV\CERTCO~1\X86
+样例输出
+GAMES
+ DRIVERS
+HOME
+WIN
+ SOFT
+WINNT
+ DRIVERS
+ SYSTEM32
+  CERTSRV
+   CERTCO~1
+    X86
+  CONFIG
+```python
+#磁盘树
+class Node:
+    def __init__(self):
+        self.children={}
+class Trie:
+    def __init__(self):
+        self.root = Node()
+    def insert(self,w):
+        cur=self.root
+        for u in w.split('\\'):
+            if u not in cur.children:
+                cur.children[u]=Node()
+            cur = cur.children[u]
+    def dfs(self,a,layer):
+        for c in sorted(a.children):
+            print(' '*layer+c)
+            self.dfs(a.children[c],layer+1)
+s=Trie()
+for _ in range(int(input())):
+    x=input()
+    s.insert(x)
+s.dfs(s.root,0)
+
+#并查集
+def find(x):#压缩路径
+    if x != s[x]:
+        s[x] = find(s[x])
+    return s[x]
+
+def union(x,y):
+    rootx = find(x);rooty = find(y)
+    if rootx != rooty:
+        s[rooty] = rootx
+    return
+def is_connected(x,y):
+
+    return find(x) == find(y)
+T = int(input())
+for i in range(1,T+1):
+
+    index = i
+    flag = True
+    n,m = map(int,input().split())
+    if n==1:
+        print("Scenario #{}:".format(index))
+        print("No suspicious bugs found!")
+        print()
+        continue
+    s=[i for i in range(2*n+2)]
+    for i in range(m):
+        t1,t2 = map(int,input().split())
+        if not flag:
+            continue
+        if is_connected(t1,t2):
+            flag = False
+
+        union(t1,t2+n)
+        union(t1+n,t2)
+    print("Scenario #{}:".format(index))
+    print("Suspicious bugs found!" if not flag else "No suspicious bugs found!")
+    print()
+```
+```python
+#败方树
+from collections import deque
+class TreeNode:
+    def __init__(self,value,min_win):
+        self.value = value
+        self.min_win = min_win
+        self.left = None
+        self.right = None
+def build_tree(values):
+    queue = deque(TreeNode(value,value) for value in values)
+    while len(queue) > 1:
+        left_node = queue.popleft()
+        right_node = queue.popleft()
+        new_node = TreeNode(max(left_node.min_win,right_node.min_win),min(left_node.min_win,right_node.min_win))
+        new_node.left = left_node
+        new_node.right = right_node
+        queue.append(new_node)
+    root = TreeNode(queue[0].min_win,queue[0].min_win)
+    root.left = queue[0]
+    return root
+def show(n,root):
+    queue = deque([root])
+    result = []
+    while queue:
+        if len(result) == n:
+            print(*result)
+            return
+        cur = queue.popleft()
+        result.append(cur.value)
+        if cur.left:
+            queue.append(cur.left)
+        if cur.right:
+            queue.append(cur.right)
+n,m = map(int,input().split())
+initial_values = list(map(int,input().split()))
+root = build_tree(initial_values)
+show(n,root)
+for _ in range(m):
+    pos,value = map(int,input().split())
+    initial_values[pos] = value
+    root = build_tree(initial_values)
+    show(n,root)
+```
+
+27947: 动态中位数
+http://cs101.openjudge.cn/practice/27947/
+
+思路： 用堆
+
+代码
+```python
+# 
+import heapq
+def dynamic_median(nums):
+    min_heap = []#存较大数据
+    max_heap = []#存较小数据
+    median = []
+    for i,num in enumerate(nums):
+        if not max_heap or num <= -max_heap[0]:
+            heapq.heappush(max_heap,-num)
+        else:
+            heapq.heappush(min_heap,num)
+        if len(max_heap)-len(min_heap)>1:
+            heapq.heappush(min_heap,-heapq.heappop(max_heap))
+        elif len(min_heap)>len(max_heap):
+            heapq.heappush(max_heap,-heapq.heappop(min_heap))
+        if i%2 == 0:
+            median.append(-max_heap[0])
+    return median
+
+def main():
+    nums = list(map(int,input().split()))
+    median = dynamic_median(nums)
+    print(len(median))
+    print(*median)
+T = int(input())
+for _ in range(T):
+    main()
+```
 
 
 ## 3. 课程总结
