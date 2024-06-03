@@ -674,6 +674,8 @@ while min_heap:
         new_time = cur_time + dis/(10000*rail_factor)
         if new_time < min_time[position]:
             min_time[position] = new_time
+            heapq.heappush(min_heap,(new_time,nx,ny))
+print(round(min_time[(ex,ey)]*60))
 
 P1260:火星大工程
 查看提交统计提问
@@ -776,7 +778,3 @@ print(T)
 #print(critical_activities)
 for a in critical_activities:
     print(*a)
-
-
-            heapq.heappush(min_heap,(new_time,nx,ny))
-print(round(min_time[(ex,ey)]*60))
