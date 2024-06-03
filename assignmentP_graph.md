@@ -1661,7 +1661,272 @@ T = int(input())
 for _ in range(T):
     main()
 ```
+体育老师组织学生进行跳高训练，查看其相对于上一次训练中跳高的成绩是否有所进步。为此，他组织同学们按学号排成一列进行测试。本次测验使用的老式测试仪，只能判断同学跳高成绩是否高于某一预设值，且由于测试仪器构造的问题，其横杠只能向上移动。由于老师只关心同学是否取得进步，因此老师只将跳高的横杠放在该同学上次跳高成绩的位置，查看同学是否顺利跃过即可。为了方便进行上次成绩的读取，同学们需按照顺序进行测验，因此对于某个同学，当现有的跳高测试仪高度均高于上次该同学成绩时，体育老师需搬出一个新的测试仪进行测验。已知同学们上次测验的成绩，请问体育老师至少需要使用多少台测试仪进行测验？
+由于采用的仪器精确度很高，因此测试数据以毫米为单位，同学们的成绩为正整数，最终测试数据可能很大，但不超过10000，且可能存在某同学上次成绩为0。
+输入
+输入共两行，第一行为一个数字N，N<=100000，表示同学的数量。第二行为N个数字，表示同学上次测验的成绩（从1号到N号排列）。
+输出
+一个正整数，表示体育老师最少需要的测试仪数量。
+样例输入
+5
+1 7 3 5 2
+样例输出
+3
+#二分+贪心
+```python
+from bisect import *
+cur_temps = []
+N = int(input())
+scores = list(map(int,input().split()))
+for idx in range(N):
+    cur = scores[idx]
+    if cur_temps:
+        if cur >= cur_temps[-1]:
+            cur_temps[-1] = cur
+        else:
+            ind = bisect(cur_temps,cur)#插入位置,同取右
+            if ind == 0:
+                cur_temps.insert(0,cur)
+            else:
+                cur_temps[ind-1] = cur
+    else:
+        cur_temps.append(cur)
+print(len(cur_temps))
+```
+//AC自动机
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N = 1e6+5;
+struct node{
+    int son[26];
+    int end;
+    int fail;
+}t[N];//字典树（数组存）
+int cnt;//字典树在数组中的位置
+void Insert(char *s){
+    int now = 0;
+    for (int i=0;s[i];i++){
+        int ch = s[i] - 'a';
+        if(t[now].son[ch]==0)
+            t[now].son[ch] = cnt++;
+        now = t[now].son[ch];    
+    }
+    t[now].end++;//?
+}
+//bfs建立指针
+void getFail(){
+    queue<int>q;
+    for(int i=0;i<26;i++){
+        if(t[0].son[i]) q.push(t[0].son[i]);
+    }
+    //fail-->同义词
+    while (!q.empty()){
+        int now = q.front();
+        q.pop();
+        for(int i=0;i<26;i++){
+            if (t[now].son[i]){
+                t[t[now].son[i]].fail = t[t[now].fail].son[i];
+                q.push(t[now].son[i]);
+               }
+            else
+                t[now].son[i] = t[t[now].fail].son[i];//虚拟节点   
+        }
+    }
+}
+int query(char *s){
+    int ans = 0;
+    int now = 0;
+    for(int i=0;s[i];i++){
+        int ch = s[i]-'a';
+        now = t[now].son[ch];
+        int tmp = now;
+        while (tmp&&t[tmp].end!=-1){
+            ans+=t[tmp].end;
+            t[tmp].end = -1;
+            tmp = t[tmp].fail;
+            //cout<<"tmp="<<tmp<<" "<<t[tmp].son;
+    }
+    }
+    return ans;
+}
+char str[N];
+int main(){
+    int k; scanf("%d",&k);
+    while (k--){
+        memset(t,0,sizeof(t));
+        cnt = 1;
+        int n; scanf("%d",&n);
+        while (n--){
+            scanf("%s",str);
+            Insert(str);
+            }
+        getFail();
+        scanf("%s",str);
+        printf("%d\n",query(str));    
+    }
+    return 0;
 
+}
+#八皇后
+```python
+#递归回溯
+def solve_n_queen(n):
+    solutions = []
+    queens = [-1] * n    #queens = [-1] * n  # 存储每一行皇后所在的列数
+
+
+    def is_valid(row,col):
+        for r in range(row):
+            if queens[r] == col or abs(row-r) == abs(col - queens[r]):
+                return False
+        return True
+
+    def backtrack(row):
+        if row == n:# 找到一个合法解决方案
+            solutions.append(queens.copy())
+        else:
+            for col in range(n):
+                if is_valid(row,col):# 检查当前位置是否合法
+                    queens[row] = col
+                    backtrack(row+1)
+                    queens[row] = -1# 回溯，撤销当前行的选择
+    backtrack(0)
+    return solutions
+# 获取第 b 个皇后串
+def get_queen_string(b):
+    solutions = solve_n_queen(8)
+    if b > len(solutions):
+        return None
+    queen_string = ''.join(str(col+1) for col in solutions[b-1])
+    return queen_string
+
+test_cases = int(input())
+for _ in range(test_cases):
+    b = int(input())
+    queen_string = get_queen_string(b)
+    print(queen_string)
+#stack means
+
+def queen_stack(n):
+    stack = []
+    solutions = []
+    stack.append((0,[]))
+
+    while stack:
+        row,cols = stack.pop() #row, cols = stack.pop() # 从栈中取出当前处理的行数和已放置的皇后位置
+        if row == n:
+            solutions.append(cols)
+        else:
+            for col in range(n):
+                if is_valid1(row,col,cols):
+                    stack.append((row+1,cols+[col]))
+    return solutions
+
+def is_valid1(row,col,queens):
+    for r in range(row):
+        if queens[r] == col or abs(row - r) == abs(col - queens[r]):
+            return False
+    return True
+def get_queen_string1(b):
+    solutions = queen_stack(8)
+    if b > len(solutions):
+        return None
+    queen_string = ''.join(str(col+1) for col in solutions[b-1])
+    return queen_string
+```
+02808: 校门外的树
+http://cs101.openjudge.cn/practice/02808/
+思路：合并
+代码
+# 
+```python
+L,M = map(int,input().split())
+res = []
+for i in range(M):
+    start,end = map(int,input().split())
+    res.append([start,end])
+res.sort(key=lambda x:x[0])
+#print(res)
+i = 0
+j = M-1
+while i<j:
+    if res[i][1] >= res[i+1][0]:
+        end1 = max(res[i][1],res[i+1][1])
+        res[i][1] = end1
+        res.pop(i+1)
+        j-=1
+    else:
+        i+=1
+num1=0
+#print(res)
+for num in res:
+    num1+=(num[1]-num[0]+1)
+print(L-num1+1)
+```
+```python
+28190: 奶牛排队
+http://cs101.openjudge.cn/practice/28190/
+
+思路： 神奇的单调栈+遍历 每点记录左更大值和右更小值，则左侧可找到最大的更小区间，再遍历j,考虑j右最大区间是否包含i
+
+代码
+
+# 
+N = int(input())
+heights = [int(input()) for _ in range(N)]
+left_bound = [-1]*N
+right_bound = [N]*N
+stack = []
+#单调减小栈，左侧第一个>=h[i]的位置
+for i in range(N):
+    while stack and heights[stack[-1]]<heights[i]:
+        stack.pop()
+    if stack:
+        left_bound[i] = stack[-1]
+    stack.append(i)
+stack.clear()
+#单调增加栈，右侧第一个<=h[i]的位置
+for i in range(N-1,-1,-1):
+    while stack and heights[stack[-1]] > heights[i]:
+        stack.pop()
+    if stack:
+        right_bound[i] = stack[-1]
+    stack.append(i)
+ans = 0
+for i in range(N):
+    for j in range(left_bound[i]+1,i):
+        if right_bound[j] > i:
+            ans = max(ans,i-j+1)
+            break
+#题目，集合，倒排索引
+n = int(input())
+lis = []#出现文档集合
+all_document = set()
+for _ in range(n):
+    data = list(map(int,input().split()))
+    doc_set = set(data[1:])
+    lis.append(doc_set)
+    all_document.update(doc_set)
+# Prepare the not-present sets 未出现文档集合
+lis1 = [all_document - doc_set for doc_set in lis]
+m = int(input())
+for _ in range(m):
+    query = list(map(int,input().split()))
+    result_set = None
+    for num,requirement in enumerate(query):
+        if requirement != 0:
+            current_set = lis[num] if requirement==1 else lis1[num]
+            #取交集
+            result_set = current_set if result_set is None else result_set.intersection(current_set)
+    if not result_set:
+        print("NOT FOUND")
+    else:
+        print(' '.join(map(str, sorted(result_set))))
+
+
+print(ans)
+```
 
 ## 3. 课程总结
 
